@@ -5,11 +5,6 @@ import plotly.express as px
 import matplotlib.pyplot as plt
 import pgeocode
 
-base="light"
-backgroundColor="white"
-secondaryBackgroundColor="lavender"
-codeBackgroundColor="powderBlue"
-
 # Configure Streamlit page Title
 st.set_page_config(page_title="Waste Estimation Model", layout="wide")
 st.title("Waste Estimation Model")
