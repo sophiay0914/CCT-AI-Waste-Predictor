@@ -91,6 +91,7 @@ if uploaded_file is not None and uploaded_file.type == "text/csv" and zipcode_fr
     df_order = df_order.sort_values('Sale Date')
 
 
+
     st.divider()
     # Step 6: Visualization
     # Total estimated waste
@@ -111,19 +112,46 @@ if uploaded_file is not None and uploaded_file.type == "text/csv" and zipcode_fr
         tab1, tab2 = st.tabs(["📊 Bar Chart", "📈 Line Graph"])
 
         with tab1: # bar chart
-            fig1 = px.bar(monthly, x='Month', y='package_weight', title='Monthly Waste: Bar Chart')
-            fig1.update_layout(xaxis_title='Month', yaxis_title='Waste Weight (lb)')
+            fig1 = px.bar(
+                monthly,
+                x='Month',
+                y='package_weight',
+                title='Monthly Waste: Bar Chart',
+                color_discrete_sequence=['green']
+            )
+            fig1.update_layout(
+                xaxis_title='Month',
+                yaxis_title='Waste Weight (lb)')
             st.plotly_chart(fig1)
 
         with tab2: # line graph
-            fig2 = px.line(monthly, x='Month', y='package_weight', title='Monthly Waste: Line Graph')
-            fig2.update_layout(xaxis_title='Month', yaxis_title='Waste Weight (lb)')
+            fig2 = px.line(
+                monthly,
+                x='Month',
+                y='package_weight',
+                title='Monthly Waste: Line Graph',
+                line_shape='linear'
+            )
+            fig2.update_traces(line_color='green')
+            fig2.update_layout(
+                xaxis_title='Month', 
+                yaxis_title='Waste Weight (lb)'
+            )
             st.plotly_chart(fig2)
     
     with col2: # cumulative line graph
         df_order['Cumulative Waste'] = df_order['package_weight'].cumsum()
-        fig3 = px.line(df_order, x='Sale Date', y='Cumulative Waste', title='Cumulative Waste Over Time')
-        fig3.update_layout(xaxis_title='Date', yaxis_title='Waste Weight (lb)')
+        fig3 = px.line(
+            df_order, 
+            x='Sale Date',
+            y='Cumulative Waste', 
+            title='Cumulative Waste Over Time'
+        )
+        fig3.update_traces(line_color='green')
+        fig3.update_layout(
+            xaxis_title='Date', 
+            yaxis_title='Waste Weight (lb)'
+        )
         st.plotly_chart(fig3)
 
 
@@ -143,8 +171,12 @@ if uploaded_file is not None and uploaded_file.type == "text/csv" and zipcode_fr
         labels={'package_weight': 'Waste Weight (lb)'},
         title='Waste by U.S. State'
     )
-    fig4.update_layout(coloraxis_colorbar_title="Waste (lb)")
-    st.plotly_chart(fig4)
+    fig4.update_layout(
+        coloraxis_colorbar_title="Waste (lb)",
+        width=1200,
+        height=700
+    )
+    st.plotly_chart(fig4, use_container_width=True)
 
     # Top 5 States Tables
     top_states = state_sales.sort_values(by='package_weight', ascending=False).head(5)
