@@ -5,12 +5,11 @@ import plotly.express as px
 import matplotlib.pyplot as plt
 import pgeocode
 
-# Title
-st.set_page_config(page_title="Waste Estimator Tool", layout="wide")
-st.title("Waste Predictor Tool")
+# Configure Streamlit page Title
+st.set_page_config(page_title="Waste Estimation Model", layout="wide")
+st.title("Waste Estimation Model")
 
-## Step 1:
-# USPS Rate Table
+# Step 1: Create USPS Shipping Rate Table
 rate = {
     "weight": [
         0.25, 0.5, 0.75, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
@@ -29,22 +28,38 @@ rate = {
    
 }
 
+# Create the Data Frame
 df_rate = pd.DataFrame(rate)
 
-# Upload CSV and ZIP input
-uploaded_file = st.file_uploader("Upload your Etsy Sold Orders CSV", type="csv")
-zipcode_from = st.text_input("Enter origin ZIP code", value="30084").strip().zfill(5)
 
-if uploaded_file and zipcode_from:
+# Step 2: Get CSV and ZIP input from user
+uploaded_file = st.file_uploader("Upload your Sold Orders CSV file", type="csv")
+zipcode_from = st.text_input("Enter your origin ZIP code").strip()
+
+
+# Step 3: Data Processing if Input is Valid
+if uploaded_file is None:
+    st.info("Please upload your CSV file.")
+elif uploaded_file.type != "text/csv":
+    st.warning("Please upload a CSV file.")
+if zipcode_from == "":
+    st.info("Please enter your ZIP code.")
+elif not(zipcode_from.isdigit()) or len(zipcode_from) != 5:
+    st.warning("Please enter a valid 5-digit origin ZIP code.")
+
+
+if uploaded_file is not None and uploaded_file.type == "text/csv" and zipcode_from != "" and zipcode_from.isdigit() and len(zipcode_from) == 5:
+    # Step 4: Read in sold order data
     df_order = pd.read_csv(uploaded_file)
     df_order['zipcode_to'] = df_order['Ship Zipcode'].astype(str).str[:5]
 
-    # Distance calculation
+    # Step 5: Calculate distance bewtween origin zip code and destination
     dist = pgeocode.GeoDistance('us')
     df_order['distance_miles'] = df_order['zipcode_to'].apply(
         lambda dest: dist.query_postal_code(zipcode_from, dest) * 0.621371
     )
 
+    # Assign distance categories
     conditions = [
         df_order['distance_miles'] <= 50,
         (df_order['distance_miles'] > 50) & (df_order['distance_miles'] <= 150),
@@ -56,8 +71,12 @@ if uploaded_file and zipcode_from:
         df_order['distance_miles'] > 1800
     ]
     choices = list(range(1, 9))
-    df_order['distance_cat'] = np.select(conditions, choices, default=8).astype(int)
-
+    df_order['distance_cat'] = np.select(conditions, choices, default=np.nan).astype(int)
+    # if foreign country, set it as 8
+    df_order.loc[df_order['distance_miles'].isna(), 'distance_cat'] = 8
+    df_order_new = df_order[(df_order["distance_cat"] >=1) & (df_order["distance_cat"] <=8) ]
+    
+    # Function to match USPS rate table
     def match_weight(distance_cat, shipping_cost):
         zone_col = f"Zone {distance_cat}"
         diffs = (df_rate[zone_col] - shipping_cost).abs()
@@ -66,36 +85,105 @@ if uploaded_file and zipcode_from:
 
     df_order['shipping_cost'] = df_order['Order Shipping'] / 0.78
     df_order['matched_weight'] = df_order.apply(lambda r: match_weight(r['distance_cat'], r['shipping_cost']), axis=1)
+    # 20% of weight is package weight
     df_order['package_weight'] = df_order['matched_weight'] * 0.2
-
     df_order['Sale Date'] = pd.to_datetime(df_order['Sale Date'])
+    df_order = df_order.sort_values('Sale Date')
 
-    st.subheader("📈 Package Weight Trends")
-    col1, col2 = st.columns(2)
 
-    with col1:
-        daily = df_order.groupby('Sale Date')['package_weight'].sum().reset_index()
-        fig1 = px.line(daily, x='Sale Date', y='package_weight', title='Daily Package Weight')
-        st.plotly_chart(fig1)
 
-    with col2:
+    st.divider()
+    # Step 6: Visualization
+    # Total estimated waste
+    total_waste = df_order['package_weight'].sum()
+    year = df_order['Sale Date'].dt.year.mode()[0]
+    st.subheader("Total Estimated Packaging Waste (lbs)")
+    st.markdown(f"<h2 style='color:green;'>{round(total_waste, 2)} lbs</h2>", unsafe_allow_html=True)
+
+    st.divider()
+    # Packaging Waste Trends
+    st.subheader("Packaging Waste Trends")
+    col1, spacer, col2 = st.columns([1, 0.2, 1])
+
+    with col1: # monthly waste
         monthly = df_order.resample('M', on='Sale Date')['package_weight'].sum().reset_index()
-        fig2 = px.line(monthly, x='Sale Date', y='package_weight', title='Monthly Package Weight')
-        st.plotly_chart(fig2)
+        monthly['Month'] = monthly['Sale Date'].dt.strftime('%b')  # Format like "Jan"
 
-    st.subheader("🗽️ Package Weight by U.S. State")
+        tab1, tab2 = st.tabs(["📊 Bar Chart", "📈 Line Graph"])
+
+        with tab1: # bar chart
+            fig1 = px.bar(
+                monthly,
+                x='Month',
+                y='package_weight',
+                title='Monthly Waste: Bar Chart',
+                color_discrete_sequence=['green']
+            )
+            fig1.update_layout(
+                xaxis_title='Month',
+                yaxis_title='Waste Weight (lb)')
+            st.plotly_chart(fig1)
+
+        with tab2: # line graph
+            fig2 = px.line(
+                monthly,
+                x='Month',
+                y='package_weight',
+                title='Monthly Waste: Line Graph',
+                line_shape='linear'
+            )
+            fig2.update_traces(line_color='green')
+            fig2.update_layout(
+                xaxis_title='Month', 
+                yaxis_title='Waste Weight (lb)'
+            )
+            st.plotly_chart(fig2)
+    
+    with col2: # cumulative line graph
+        df_order['Cumulative Waste'] = df_order['package_weight'].cumsum()
+        fig3 = px.line(
+            df_order, 
+            x='Sale Date',
+            y='Cumulative Waste', 
+            title='Cumulative Waste Over Time'
+        )
+        fig3.update_traces(line_color='green')
+        fig3.update_layout(
+            xaxis_title='Date', 
+            yaxis_title='Waste Weight (lb)'
+        )
+        st.plotly_chart(fig3)
+
+
+    st.divider()
+    # State-level analysis
+    st.subheader("Packaging Waste by State")
     us_sales = df_order[df_order['Ship Country'] == 'United States']
     state_sales = us_sales.groupby('Ship State')['package_weight'].sum().reset_index()
-    fig3 = px.choropleth(
+    # U.S. State Choropleth Map
+    fig4 = px.choropleth(
         state_sales,
         locations='Ship State',
         locationmode='USA-states',
         color='package_weight',
         scope='usa',
-        color_continuous_scale='Blues',
-        labels={'package_weight': 'Package Weight (lb)'},
-        title='Package Weight by U.S. State'
+        color_continuous_scale='Greens',
+        labels={'package_weight': 'Waste Weight (lb)'},
+        title='Waste by U.S. State'
     )
-    st.plotly_chart(fig3)
+    fig4.update_layout(
+        coloraxis_colorbar_title="Waste (lb)",
+        width=1200,
+        height=700
+    )
+    st.plotly_chart(fig4, use_container_width=True)
 
-    st.success("Analysis complete! Scroll up to see results.")
+    # Top 5 States Tables
+    top_states = state_sales.sort_values(by='package_weight', ascending=False).head(5)
+    top_states = top_states.rename(columns={
+        'Ship State': 'State',
+        'package_weight': 'Total Waste Weight (lb)'
+    })
+    top_states.insert(0, 'Rank', range(1, 6))
+
+    st.table(top_states.reset_index(drop=True).style.hide(axis='index'))
