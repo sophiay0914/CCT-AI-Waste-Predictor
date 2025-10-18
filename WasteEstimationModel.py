@@ -227,10 +227,10 @@ FLOW = {
     "outer_packaging": {
         "text": (
             "Outer packaging protects your product during shipping while keeping it eco-friendly:\n\n"
-        "• **Honeycomb Mailers** – paper-based padded mailers that replace plastic bubble mailers. Fully recyclable and perfect for jewelry, accessories, and clothing\n" 
-        "• **Compostable Mailers** – made from cornstarch or PLA, these decompose naturally and replace traditional poly mailers\n"
-        "• **Cardboard Boxes** – sturdy, biodegradable boxes ideal for fragile home decor or art\n"
-        "• **Rigid Paper Mailers** – great for art prints, books, and documents — recyclable and plastic-free",
+        "• **Honeycomb Mailers** – paper-based padded mailers that replace plastic bubble mailers. Fully recyclable and perfect for jewelry, accessories, and clothing\n\n" 
+        "• **Compostable Mailers** – made from cornstarch or PLA, these decompose naturally and replace traditional poly mailers\n\n"
+        "• **Cardboard Boxes** – sturdy, biodegradable boxes ideal for fragile home decor or art\n\n"
+        "• **Rigid Paper Mailers** – great for art prints, books, and documents — recyclable and plastic-free\n\n",
         "• **Paper Envelopes** – lightweight, recyclable mailers made from kraft paper. Perfect for flat items such as greeting cards, small prints, or stickers."
         ),
         "options": [
