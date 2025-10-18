@@ -371,37 +371,6 @@ def render_chat_ui():
     node_id = st.session_state.current_node
     node = FLOW[node_id]
 
-    # Optional form
-    if "form" in node:
-        with st.chat_message("assistant"):
-            st.markdown(node["text"])
-            form_cfg = node["form"]
-            with st.form("mini_chat_form", clear_on_submit=False):
-                data = st.session_state.form_data.setdefault(node_id, {})
-                for field in form_cfg["fields"]:
-                    key = field["key"]
-                    label = field["label"]
-                    ftype = field.get("type", "text")
-                    required = field.get("required", False)
-                    if ftype == "text":
-                        data[key] = st.text_input(label, value=data.get(key, ""))
-                    elif ftype == "select":
-                        choices = field.get("choices", [])
-                        idx = choices.index(data.get(key, choices[0])) if data.get(key) in choices and choices else 0
-                        data[key] = st.selectbox(label, choices, index=idx)
-                    else:
-                        data[key] = st.text_input(label, value=data.get(key, ""))  # fallback
-
-                submitted = st.form_submit_button(form_cfg.get("submit_label", "Submit"))
-                if submitted:
-                    missing = [f["label"] for f in form_cfg["fields"] if f.get("required") and not data.get(f["key"], "").strip()]
-                    if missing:
-                        st.warning("Please fill: " + ", ".join(missing))
-                    else:
-                        summary = ", ".join(f"{f['label']}: {data.get(f['key'])}" for f in form_cfg["fields"])
-                        st.session_state.history.append({"role": "user", "content": f"(submitted) {summary}"})
-                        go(form_cfg["next_on_submit"])
-
     # Options as buttons (use on_click to avoid double-click feel)
     if "options" in node and node["options"]:
         with st.chat_message("assistant"):
