@@ -7,48 +7,59 @@ FLOW = {
     "start": {
         "text": "Hi! I’m here to help you start your sustainability journey based off of your results. What do you need?",
         "options": [
-            {"label": "Product Catalog", "next": "product_catalog"},
-            {"label": "Recommendation", "next": "recommendation"},
-            {"label": "Contact support", "next": "contact"},
+            {"label": "🌿 Product Catalog", "next": "product_catalog"},
+            {"label": "💡 Recommendation", "next": "recommendation"},
+            {"label": "📞 Contact Support", "next": "contact"},
         ],
     },
-    "product_info": {
+    "product_catalog": {
         "text": "Sustainable packaging comes in different forms: honeycomb padded mailers, paper mailers, honeycomb paper, kraft tape. What would you like to learn about?",
         "options": [
-            {"label": "Hone", "next": "alpha"},
-            {"label": "Beta", "next": "beta"},
-            {"label": "Gamma", "next": "gamma"},
-            {"label": "⬅️ Back", "next": "start"},
+            {"label": "📦 Outer Packaging", "next": "outer_packaging"},
+            {"label": "🪶 Inner Packaging", "next": "inner_packaging"},
+            {"label": "🎁 Product Wrapping/Containers", "next": "product_wrapping/containers"},
+            {"label": "🏷️ Sealing & Labeling", "next": "sealing_labeling"},
+            {"label": "💌Inserts & Extras", "next": "inserts_extras"},
+            {"label": "<- Back", "next": "start"},
         ],
     },
-    "alpha": {
-        "text": "Alpha includes core features and email support. Anything else?",
+    "outer_packaging": {
+        "text": "Outer packaging protects your product during shipping while keeping it eco-friendly:\n\n• **Honeycomb Mailers** – paper-based padded mailers that replace plastic bubble mailers. Fully recyclable and perfect for jewelry, accessories, and clothing.\n• **Compostable Mailers** – made from cornstarch or PLA, these decompose naturally and replace traditional poly mailers.\n• **Corrugated Cardboard Boxes** – sturdy, recycled boxes ideal for fragile home decor or art.\n• **Rigid Paper Mailers** – great for art prints, books, and documents — recyclable and plastic-free.",
         "options": [
             {"label": "See pricing", "next": "pricing"},
-            {"label": "⬅️ Back to Products", "next": "product_info"},
+            {"label": "<- Back to Products", "next": "product_info"},
         ],
     },
-    "beta": {
+    "inner_packaging": {
         "text": "Beta adds automation and team collaboration. Anything else?",
         "options": [
             {"label": "See pricing", "next": "pricing"},
-            {"label": "⬅️ Back to Products", "next": "product_info"},
+            {"label": "<- Back to Products", "next": "product_info"},
         ],
     },
-    "gamma": {
+    "product_wrapping/containers": {
         "text": "Gamma includes everything in Beta plus SSO and a dedicated manager.",
         "options": [
             {"label": "See pricing", "next": "pricing"},
-            {"label": "⬅️ Back to Products", "next": "product_info"},
+            {"label": "<- Back to Products", "next": "product_info"},
         ],
     },
-    "pricing": {
+    "sealing_labeling": {
         "text": "Pricing: Alpha $9/mo, Beta $29/mo, Gamma custom. Need a quote?",
         "options": [
             {"label": "Get a quote", "next": "quote_form"},
-            {"label": "⬅️ Back to Start", "next": "start"},
+            {"label": "<- Back to Start", "next": "start"},
         ],
     },
+    "inserts_extras": {
+        "text": "Pricing: Alpha $9/mo, Beta $29/mo, Gamma custom. Need a quote?",
+        "options": [
+            {"label": "Get a quote", "next": "quote_form"},
+            {"label": "<- Back to Start", "next": "start"},
+        ],
+    },
+
+    
     # Example node with a small form (no AI)
     "quote_form": {
         "text": "Great—tell us a bit and we’ll email a quote.",
