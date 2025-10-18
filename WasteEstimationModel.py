@@ -38,7 +38,7 @@ zipcode_from = st.text_input("Enter your origin ZIP code").strip()
 
 
 # Step 3: Data Processing if Input is Valid
-while true:
+while True:
     if uploaded_file is None:
         st.info("Please upload your CSV file.")
     elif uploaded_file.type != "text/csv":
