@@ -47,9 +47,8 @@ if zipcode_from == "":
 elif not(zipcode_from.isdigit()) or len(zipcode_from) != 5:
     st.warning("Please enter a valid 5-digit origin ZIP code.")
 
-#if uploaded_file is None or uploaded_file.type != "text/csv" or zipcode_from == "" or not zipcode_from.isdigit() or len(zipcode_from) != 5:
-    
-# Step 4: Read in sold order data
+if uploaded_file is not None and uploaded_file.type == "text/csv" and zipcode_from != "" and zipcode_from.isdigit() and len(zipcode_from) == 5:
+    # Step 4: Read in sold order data
 df_order = pd.read_csv(uploaded_file)
 df_order['zipcode_to'] = df_order['Ship Zipcode'].astype(str).str[:5]
 
