@@ -218,8 +218,8 @@ else:
 
 # ================== CHATBOT ==================
 FLOW = {
+    "text": "Hi! I’m here to help you start your sustainability journey based off of your results. What do you need?",
     "start": {
-        "text": "Hi! I’m here to help you start your sustainability journey based off of your results. What do you need?",
         "options": [
             {"label": "🌿 Product Catalog", "next": "product_catalog"},
             {"label": "💡 Personalized Recommendation", "next": "recommendation"},
