@@ -35,7 +35,20 @@ df_rate = pd.DataFrame(rate)
 # Step 2: Get CSV and ZIP input from user
 uploaded_file = st.file_uploader("Upload your Sold Orders CSV file", type="csv")
 zipcode_from = st.text_input("Enter your origin ZIP code").strip()
-
+CATEGORIES = [
+    "— Select —",
+    "Jewelry & Accessories",
+    "Clothing",
+    "Home & Living",
+    "Art & Prints",
+    "Bags & Purses",
+    "Bath, Beauty, & Health",
+    "Toys, Games, & Kids",
+    "Books, Music, & Media",
+    "Food & Beverages",
+    "Stationery & Small Gifts",
+]
+business_category = st.selectbox("Select your business category", CATEGORIES, index=0)
 
 # Step 3: Data Processing if Input is Valid
 if uploaded_file is None:
@@ -47,7 +60,7 @@ if zipcode_from == "":
 elif not(zipcode_from.isdigit()) or len(zipcode_from) != 5:
     st.warning("Please enter a valid 5-digit origin ZIP code.")
 
-if uploaded_file is not None and uploaded_file.type == "text/csv" and zipcode_from != "" and zipcode_from.isdigit() and len(zipcode_from) == 5:
+if uploaded_file is not None and uploaded_file.type == "text/csv" and zipcode_from != "" and zipcode_from.isdigit() and len(zipcode_from) == 5 and st.session_state.get("biz_category") is not None:
     # Step 4: Read in sold order data
     df_order = pd.read_csv(uploaded_file)
     df_order['zipcode_to'] = df_order['Ship Zipcode'].astype(str).str[:5]
