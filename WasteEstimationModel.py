@@ -219,7 +219,6 @@ else:
 # ================== CHATBOT ==================
 FLOW = {
     "start": {
-        "text": "Hi! I’m here to help you start your sustainability journey based off of your results. What do you need?",
         "options": [
             {"label": "🌿 Product Catalog", "next": "product_catalog"},
             {"label": "💡 Personalized Recommendation", "next": "recommendation"},
@@ -338,6 +337,8 @@ def go(node_id: str):
     st.session_state.current_node = node_id
     if node_id == "start" and any("Hi! I’m here to help" in m["content"] for m in st.session_state.history):
         return
+    else:
+        "text": "Hi! I’m here to help you start your sustainability journey based off of your results. What do you need?"
     node = FLOW[node_id]
     st.session_state.history.append({"role": "assistant", "content": node["text"]})
 
