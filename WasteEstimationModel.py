@@ -328,6 +328,9 @@ if "current_node" not in st.session_state:
     st.session_state.current_node = "start"
 if "form_data" not in st.session_state:
     st.session_state.form_data = {}
+# keep the chat open across reruns
+if "chat_open" not in st.session_state:
+    st.session_state.chat_open = False
 
 def go(node_id: str):
     st.session_state.current_node = node_id
@@ -343,26 +346,26 @@ def reset_chat():
 if not st.session_state.history:
     go("start")
 
-# ---------- Chat UI renderer (used inside the floating popover) ----------
+# ---------- Chat UI renderer ----------
 def render_chat_ui():
     # Controls row
     c1, c2 = st.columns(2)
     with c1:
-        if st.button("⟳ Restart", use_container_width=True):
-            reset_chat()
-            st.rerun()
+        if st.button("⟳ Restart", use_container_width=True, key="chat_restart"):
+            reset_chat()  # no st.rerun()
     with c2:
         st.download_button(
             "⬇️ Export transcript",
             data="\n".join([f'{m["role"]}: {m["content"]}' for m in st.session_state.history]),
             file_name="chat_transcript.txt",
-            use_container_width=True
+            use_container_width=True,
+            key="chat_export",
         )
 
     st.divider()
 
     # History
-    for m in st.session_state.history[-12:]:
+    for i, m in enumerate(st.session_state.history[-12:]):
         with st.chat_message(m["role"]):
             st.markdown(m["content"])
 
@@ -382,13 +385,13 @@ def render_chat_ui():
                     ftype = field.get("type", "text")
                     required = field.get("required", False)
                     if ftype == "text":
-                        data[key] = st.text_input(label, value=data.get(key, ""))
+                        data[key] = st.text_input(label, value=data.get(key, ""), key=f"form_{node_id}_{key}")
                     elif ftype == "select":
                         choices = field.get("choices", [])
                         idx = choices.index(data.get(key, choices[0])) if data.get(key) in choices and choices else 0
-                        data[key] = st.selectbox(label, choices, index=idx)
+                        data[key] = st.selectbox(label, choices, index=idx, key=f"form_{node_id}_{key}")
                     else:
-                        data[key] = st.text_input(label, value=data.get(key, ""))  # fallback
+                        data[key] = st.text_input(label, value=data.get(key, ""), key=f"form_{node_id}_{key}")  # fallback
 
                 submitted = st.form_submit_button(form_cfg.get("submit_label", "Submit"))
                 if submitted:
@@ -398,8 +401,7 @@ def render_chat_ui():
                     else:
                         summary = ", ".join(f"{f['label']}: {data.get(f['key'])}" for f in form_cfg["fields"])
                         st.session_state.history.append({"role": "user", "content": f"(submitted) {summary}"})
-                        go(form_cfg["next_on_submit"])
-                        st.rerun()
+                        go(form_cfg["next_on_submit"])  # no st.rerun()
 
     # Options as buttons
     if "options" in node and node["options"]:
@@ -410,39 +412,15 @@ def render_chat_ui():
                 col = cols[i % len(cols)]
                 if col.button(opt["label"], key=f"opt_{node_id}_{i}", use_container_width=True):
                     st.session_state.history.append({"role": "user", "content": opt["label"]})
-                    go(opt["next"])
-                    st.rerun()
+                    go(opt["next"])  # no st.rerun()
     else:
         with st.chat_message("assistant"):
             st.info("End of this path. Use **Restart** to begin again.")
 
-# ---------- Floating launcher styles ----------
-st.markdown("""
-<style>
-/* Position the launcher container at bottom-right */
-._chat_launcher_anchor { position: fixed; right: 16px; bottom: 16px; z-index: 1000; }
+# ---------- Chat launcher (expander that stays open) ----------
+# Small launcher button; once pressed, expander stays open across reruns
+if st.button("💬 Get Personalized Recommendations", key="chat_open_btn"):
+    st.session_state.chat_open = True
 
-/* Make the popover panel a nice compact size */
-[data-testid="stPopover"] > div { width: 360px; max-width: 90vw; }
-</style>
-""", unsafe_allow_html=True)
-
-# ---------- Floating launcher + popover ----------
-# NOTE: Requires Streamlit >= 1.32 for st.popover.
-# If your version doesn't have st.popover, replace the block below with:
-#   with st.expander("💬 Get Personalized Recommendations", expanded=True): render_chat_ui()
-# and remove the floating CSS to keep it simple.
-
-anchor = st.container()
-with anchor:
-    # The next two lines "wrap" the launcher so the CSS can pin it to bottom-right
-    st.markdown('<div class="_chat_launcher_anchor">', unsafe_allow_html=True)
-    try:
-        # Popover trigger (click to open the mini chat)
-        with st.popover("💬 Get Personalized Recommendations"):
-            render_chat_ui()
-    except Exception:
-        # Fallback for older Streamlit: use an expander instead of popover
-        with st.expander("💬 Get Personalized Recommendations", expanded=False):
-            render_chat_ui()
-    st.markdown('</div>', unsafe_allow_html=True)
+with st.expander("💬 Get Personalized Recommendations", expanded=st.session_state.chat_open):
+    render_chat_ui()
