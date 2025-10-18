@@ -54,7 +54,7 @@ category = st.selectbox("Select your business category", CATEGORIES, index=0)
 st.info("Please upload your CSV file, enter your ZIP code, and select your business category.") 
 if uploaded_file is not None and uploaded_file.type != "text/csv": 
     st.warning("Please upload a CSV file.") 
-if zipcode_from and not(zipcode_from.isdigit()) or len(zipcode_from) != 5: 
+if zipcode_from and (not(zipcode_from.isdigit()) or len(zipcode_from) != 5): 
     st.warning("Please enter a valid 5-digit origin ZIP code.")
 
 if uploaded_file is not None and uploaded_file.type == "text/csv" and zipcode_from != "" and zipcode_from.isdigit() and len(zipcode_from) == 5 and category != "— Select —":
