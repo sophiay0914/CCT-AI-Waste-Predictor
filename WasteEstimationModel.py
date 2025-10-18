@@ -359,7 +359,25 @@ if not st.session_state.bootstrapped:
     st.session_state.bootstrapped = True
     go("start")
 
+def _handle_option_click(next_node: str, label: str):
+    """Handle option button clicks without needing a double click."""
+    # Log the user's choice
+    st.session_state.history.append({"role": "user", "content": label})
 
+    # Move to the next node
+    st.session_state.current_node = next_node
+    node = FLOW[next_node]
+
+    # Append the assistant message for the next node.
+    # Respect the 'show start only once' rule if you're using that flag.
+    if next_node != "start":
+        st.session_state.history.append({"role": "assistant", "content": node["text"]})
+    else:
+        # Only show the start message if it hasn't been shown yet
+        if not st.session_state.get("start_message_shown", False):
+            st.session_state.history.append({"role": "assistant", "content": node["text"]})
+            st.session_state.start_message_shown = True
+            
 # ---------- Chat UI renderer (used inside the floating widget) ----------
 def render_chat_ui():
     # Controls row
