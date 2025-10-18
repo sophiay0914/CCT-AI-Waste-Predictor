@@ -8,7 +8,7 @@ FLOW = {
         "text": "Hi! I’m here to help you start your sustainability journey based off of your results. What do you need?",
         "options": [
             {"label": "🌿 Product Catalog", "next": "product_catalog"},
-            {"label": "💡 Recommendation", "next": "recommendation"},
+            {"label": "💡 Personalized Recommendation", "next": "recommendation"},
             {"label": "📞 Contact Support", "next": "contact"},
         ],
     },
@@ -91,6 +91,12 @@ FLOW = {
         ],
     },
 
+    "recommendation": {
+        "text": "Based on your selected category and statistical results, here is my recommendations personalized for you!",
+        "options": [
+            {"label": "Back to Start", "next": "start"},
+        ],
+    },
     
     "contact": {
         "text": "You can contact us for more specific inquiries & help for your transition at cleanchoicestogether@gmail.com",
