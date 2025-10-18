@@ -48,19 +48,16 @@ CATEGORIES = [
     "Food & Beverages",
     "Stationery & Small Gifts",
 ]
-business_category = st.selectbox("Select your business category", CATEGORIES, index=0)
+category = st.selectbox("Select your business category", CATEGORIES, index=0)
 
 # Step 3: Data Processing if Input is Valid
-if uploaded_file is None: 
-    st.info("Please upload your CSV file.") 
-elif uploaded_file.type != "text/csv": 
+st.info("Please upload your CSV file, enter your ZIP code, and select your business category.") 
+if uploaded_file.type != "text/csv": 
     st.warning("Please upload a CSV file.") 
-if zipcode_from == "": 
-    st.info("Please enter your ZIP code.") 
-elif not(zipcode_from.isdigit()) or len(zipcode_from) != 5: 
+if not(zipcode_from.isdigit()) or len(zipcode_from) != 5: 
     st.warning("Please enter a valid 5-digit origin ZIP code.")
 
-if uploaded_file is not None and uploaded_file.type == "text/csv" and zipcode_from != "" and zipcode_from.isdigit() and len(zipcode_from) == 5 and st.session_state.get("biz_category") is not None:
+if uploaded_file is not None and uploaded_file.type == "text/csv" and zipcode_from != "" and zipcode_from.isdigit() and len(zipcode_from) == 5 and category != "— Select —":
     # Step 4: Read in sold order data
     df_order = pd.read_csv(uploaded_file)
     df_order['zipcode_to'] = df_order['Ship Zipcode'].astype(str).str[:5]
