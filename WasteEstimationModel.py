@@ -50,10 +50,9 @@ CATEGORIES = [
 ]
 category = st.selectbox("Select your business category", CATEGORIES, index=0)
 
-is_valid_csv = uploaded_file is not None
+is_valid_csv = (uploaded_file is not None) and (uploaded_file.type == "text/csv")
 is_valid_zip = (zipcode_from != "") and zipcode_from.isdigit() and (len(zipcode_from) == 5)
-is_valid_cat = category != "— Select —"
-
+is_valid_cat = (category != "— Select —")
 all_valid = is_valid_csv and is_valid_zip and is_valid_cat
 run_clicked = st.button("▶️ Run analysis", type="primary", disabled=not all_valid)
 # Step 3: Data Processing if Input is Valid
