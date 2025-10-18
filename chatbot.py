@@ -17,71 +17,83 @@ FLOW = {
         "options": [
             {"label": "📦 Outer Packaging", "next": "outer_packaging"},
             {"label": "🪶 Inner Packaging", "next": "inner_packaging"},
-            {"label": "🎁 Product Wrapping/Containers", "next": "product_wrapping/containers"},
+            {"label": "🎁 Product Wrapping/Containers", "next": "product_wrapping_containers"},
             {"label": "🏷️ Sealing & Labeling", "next": "sealing_labeling"},
             {"label": "💌Inserts & Extras", "next": "inserts_extras"},
             {"label": "<- Back", "next": "start"},
         ],
     },
     "outer_packaging": {
-        "text": "Outer packaging protects your product during shipping while keeping it eco-friendly:\n\n• **Honeycomb Mailers** – paper-based padded mailers that replace plastic bubble mailers. Fully recyclable and perfect for jewelry, accessories, and clothing.\n• **Compostable Mailers** – made from cornstarch or PLA, these decompose naturally and replace traditional poly mailers.\n• **Corrugated Cardboard Boxes** – sturdy, recycled boxes ideal for fragile home decor or art.\n• **Rigid Paper Mailers** – great for art prints, books, and documents — recyclable and plastic-free.",
+        "text": (
+            "Outer packaging protects your product during shipping while keeping it eco-friendly:\n\n"
+        "• **Honeycomb Mailers** – paper-based padded mailers that replace plastic bubble mailers. Fully recyclable and perfect for jewelry, accessories, and clothing\n" 
+        "• **Compostable Mailers** – made from cornstarch or PLA, these decompose naturally and replace traditional poly mailers\n"
+        "• **Cardboard Boxes** – sturdy, biodegradable boxes ideal for fragile home decor or art\n"
+        "• **Rigid Paper Mailers** – great for art prints, books, and documents — recyclable and plastic-free",
+        "• **Paper Envelopes** – lightweight, recyclable mailers made from kraft paper. Perfect for flat items such as greeting cards, small prints, or stickers."
+        ),
         "options": [
             {"label": "See pricing", "next": "pricing"},
             {"label": "<- Back to Products", "next": "product_info"},
         ],
     },
     "inner_packaging": {
-        "text": "Beta adds automation and team collaboration. Anything else?",
+        "text": (
+            "Inner packaging cushions and protects your items while avoiding plastic:\n\n"
+            "• **Honeycomb Packing Paper** – expands to create a flexible paper wrap that replaces bubble wrap.\n\n"
+            "• **Shredded Kraft Paper** – made from recycled paper, provides eco-friendly cushioning for fragile items.\n\n"
+            "• **Tissue Paper** – adds presentation and protection for jewelry, accessories, or clothing.\n\n"
+            "• **Mushroom Packaging** – grown from mycelium and compostable, perfect for glass or ceramic goods."
+        ),
         "options": [
             {"label": "See pricing", "next": "pricing"},
             {"label": "<- Back to Products", "next": "product_info"},
         ],
     },
-    "product_wrapping/containers": {
-        "text": "Gamma includes everything in Beta plus SSO and a dedicated manager.",
+    "product_wrapping_containers": {
+        "text": (
+            "Product wrapping and containers hold or present your items sustainably:\n\n"
+            "• **Glassine Bags** – translucent and biodegradable, used for jewelry, prints, and soaps.\n\n"
+            "• **Kraft Paper Wrap** – recyclable paper for wrapping clothing or small home goods.\n\n"
+            "• **Aluminum or Tin Containers** – reusable and recyclable, ideal for candles or beauty products.\n\n"
+            "• **Glass Jars / Bottles** – plastic-free option for bath salts, scrubs, or beverages.\n\n"
+            "• **Cardboard Tubes / Boxes** – used for art, posters, or apparel — fully recyclable."
+        ),
         "options": [
             {"label": "See pricing", "next": "pricing"},
             {"label": "<- Back to Products", "next": "product_info"},
         ],
     },
     "sealing_labeling": {
-        "text": "Pricing: Alpha $9/mo, Beta $29/mo, Gamma custom. Need a quote?",
+        "text": (
+            "Sealing and labeling materials keep your packaging closed and branded without plastic:\n\n"
+            "• **Kraft Paper Tape** – water-activated tape that’s 100% recyclable.\n\n"
+            "• **Compostable Labels** – made from sugarcane or PLA film; biodegradable and customizable.\n\n"
+            "• **Paper Stickers** – recyclable labels with soy-based inks.\n\n"
+            "• **Hemp Twine** – replaces plastic string for rustic and eco branding."
+        ),
         "options": [
             {"label": "Get a quote", "next": "quote_form"},
-            {"label": "<- Back to Start", "next": "start"},
+            {"label": "<- Back to Products", "next": "start"},
         ],
     },
     "inserts_extras": {
-        "text": "Pricing: Alpha $9/mo, Beta $29/mo, Gamma custom. Need a quote?",
+        "text": (
+            "Inserts and extras enhance presentation and promote sustainability:\n\n"
+            "• **Paper Thank-You Cards** – made from post-consumer paper or seed paper that can be planted.\n\n"
+            "• **Paper Tags** – biodegradable tags that grow wildflowers or herbs.\n\n"
+            "• **Paper Crinkle Fill** – replaces plastic confetti for cushioning and aesthetics.\n\n"
+            "• **QR Code Cards** – encourage paperless communication by linking to digital care instructions or sustainability stories."
+        ),
         "options": [
             {"label": "Get a quote", "next": "quote_form"},
-            {"label": "<- Back to Start", "next": "start"},
+            {"label": "<- Back to Products", "next": "start"},
         ],
     },
 
     
-    # Example node with a small form (no AI)
-    "quote_form": {
-        "text": "Great—tell us a bit and we’ll email a quote.",
-        "form": {
-            "fields": [
-                {"key": "name", "label": "Your name", "type": "text", "required": True},
-                {"key": "email", "label": "Email", "type": "text", "required": True},
-                {"key": "plan", "label": "Plan", "type": "select", "choices": ["Alpha", "Beta", "Gamma"], "required": True},
-            ],
-            "submit_label": "Request quote",
-            "next_on_submit": "quote_done",
-        },
-        "options": [{"label": "⬅️ Back to Pricing", "next": "pricing"}],
-    },
-    "quote_done": {
-        "text": "Thanks! We’ll send a quote shortly. Anything else?",
-        "options": [
-            {"label": "Back to Start", "next": "start"},
-        ]
-    },
     "contact": {
-        "text": "You can reach support at support@example.com or (555) 555-5555.",
+        "text": "You can contact us for more specific inquiries & help for your transition at cleanchoicestogether@gmail.com",
         "options": [
             {"label": "Back to Start", "next": "start"},
         ],
