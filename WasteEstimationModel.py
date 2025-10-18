@@ -327,9 +327,12 @@ if "current_node" not in st.session_state:
     st.session_state.current_node = "start"
 if "form_data" not in st.session_state:
     st.session_state.form_data = {}
-# keep the chat open across reruns
-if "chat_open" not in st.session_state:
-    st.session_state.chat_open = False
+if "chat_initialized" not in st.session_state:
+    # Seed the first message once
+    st.session_state.chat_initialized = True
+    st.session_state.history.append(
+        {"role": "assistant", "content": FLOW["start"]["text"]}
+    )
 
 def go(node_id: str):
     st.session_state.current_node = node_id
@@ -337,34 +340,31 @@ def go(node_id: str):
     st.session_state.history.append({"role": "assistant", "content": node["text"]})
 
 def reset_chat():
-    st.session_state.history = []
+    st.session_state.history = [{"role": "assistant", "content": FLOW["start"]["text"]}]
     st.session_state.current_node = "start"
     st.session_state.form_data = {}
-    go("start")
 
-if not st.session_state.history:
-    go("start")
+def _handle_option_click(label: str, next_node: str):
+    # Called by option buttons; no rerun needed
+    st.session_state.history.append({"role": "user", "content": label})
+    go(next_node)
 
-# ---------- Chat UI renderer ----------
+# ---------- Chat UI renderer (used inside the floating widget) ----------
 def render_chat_ui():
     # Controls row
     c1, c2 = st.columns(2)
-    with c1:
-        if st.button("⟳ Restart", use_container_width=True, key="chat_restart"):
-            reset_chat()  # no st.rerun()
-    with c2:
-        st.download_button(
-            "⬇️ Export transcript",
-            data="\n".join([f'{m["role"]}: {m["content"]}' for m in st.session_state.history]),
-            file_name="chat_transcript.txt",
-            use_container_width=True,
-            key="chat_export",
-        )
+    c1.button("⟳ Restart", use_container_width=True, on_click=reset_chat)
+    c2.download_button(
+        "⬇️ Export transcript",
+        data="\n".join([f'{m["role"]}: {m["content"]}' for m in st.session_state.history]),
+        file_name="chat_transcript.txt",
+        use_container_width=True
+    )
 
     st.divider()
 
     # History
-    for i, m in enumerate(st.session_state.history[-12:]):
+    for m in st.session_state.history[-12:]:
         with st.chat_message(m["role"]):
             st.markdown(m["content"])
 
@@ -384,13 +384,13 @@ def render_chat_ui():
                     ftype = field.get("type", "text")
                     required = field.get("required", False)
                     if ftype == "text":
-                        data[key] = st.text_input(label, value=data.get(key, ""), key=f"form_{node_id}_{key}")
+                        data[key] = st.text_input(label, value=data.get(key, ""))
                     elif ftype == "select":
                         choices = field.get("choices", [])
                         idx = choices.index(data.get(key, choices[0])) if data.get(key) in choices and choices else 0
-                        data[key] = st.selectbox(label, choices, index=idx, key=f"form_{node_id}_{key}")
+                        data[key] = st.selectbox(label, choices, index=idx)
                     else:
-                        data[key] = st.text_input(label, value=data.get(key, ""), key=f"form_{node_id}_{key}")  # fallback
+                        data[key] = st.text_input(label, value=data.get(key, ""))  # fallback
 
                 submitted = st.form_submit_button(form_cfg.get("submit_label", "Submit"))
                 if submitted:
@@ -400,22 +400,26 @@ def render_chat_ui():
                     else:
                         summary = ", ".join(f"{f['label']}: {data.get(f['key'])}" for f in form_cfg["fields"])
                         st.session_state.history.append({"role": "user", "content": f"(submitted) {summary}"})
-                        go(form_cfg["next_on_submit"])  # no st.rerun()
+                        go(form_cfg["next_on_submit"])
 
-    # Options as buttons
+    # Options as buttons (use on_click to avoid double-click feel)
     if "options" in node and node["options"]:
         with st.chat_message("assistant"):
             st.caption("Choose an option:")
             cols = st.columns(min(3, len(node["options"])))
             for i, opt in enumerate(node["options"]):
                 col = cols[i % len(cols)]
-                if col.button(opt["label"], key=f"opt_{node_id}_{i}", use_container_width=True):
-                    st.session_state.history.append({"role": "user", "content": opt["label"]})
-                    go(opt["next"])  # no st.rerun()
+                col.button(
+                    opt["label"],
+                    key=f"opt_{node_id}_{i}",  # stable, unique
+                    use_container_width=True,
+                    on_click=_handle_option_click,
+                    args=(opt["label"], opt["next"])
+                )
     else:
         with st.chat_message("assistant"):
             st.info("End of this path. Use **Restart** to begin again.")
 
-# ---------- Chat launcher (expander that stays open) ----------
+# ---------- Launcher (expander only; no popover anywhere else) ----------
 with st.expander("💬 Get Personalized Recommendations", expanded=False):
     render_chat_ui()
