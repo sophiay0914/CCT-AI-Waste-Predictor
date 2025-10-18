@@ -417,9 +417,5 @@ def render_chat_ui():
             st.info("End of this path. Use **Restart** to begin again.")
 
 # ---------- Chat launcher (expander that stays open) ----------
-# Small launcher button; once pressed, expander stays open across reruns
-if st.button("💬 Get Personalized Recommendations", key="chat_open_btn"):
-    st.session_state.chat_open = True
-
 with st.expander("💬 Get Personalized Recommendations", expanded=st.session_state.chat_open):
     render_chat_ui()
