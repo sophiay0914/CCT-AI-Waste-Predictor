@@ -55,7 +55,7 @@ is_valid_zip = (zipcode_from != "") and zipcode_from.isdigit() and (len(zipcode_
 is_valid_cat = category != "— Select —"
 
 all_valid = is_valid_csv and is_valid_zip and is_valid_cat
-run_clicked = st.button("▶️ Run analysis", type="primary", disabled=all_valid)
+run_clicked = st.button("▶️ Run analysis", type="primary", disabled=not all_valid)
 # Step 3: Data Processing if Input is Valid
 if is_valid_csv and is_valid_zip and is_valid_cat:
     all_valid = True
