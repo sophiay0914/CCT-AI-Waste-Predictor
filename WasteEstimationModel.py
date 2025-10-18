@@ -248,7 +248,7 @@ FLOW = {
         ),
         "options": [
             {"label": "See pricing", "next": "pricing"},
-            {"label": "<- Back to Products", "next": "product_info"},
+            {"label": "<- Back to Products", "next": "product_catalog"},
         ],
     },
     "inner_packaging": {
@@ -261,7 +261,7 @@ FLOW = {
         ),
         "options": [
             {"label": "See pricing", "next": "pricing"},
-            {"label": "<- Back to Products", "next": "product_info"},
+            {"label": "<- Back to Products", "next": "product_catalog"},
         ],
     },
     "product_wrapping_containers": {
@@ -275,7 +275,7 @@ FLOW = {
         ),
         "options": [
             {"label": "See pricing", "next": "pricing"},
-            {"label": "<- Back to Products", "next": "product_info"},
+            {"label": "<- Back to Products", "next": "product_catalog"},
         ],
     },
     "sealing_labeling": {
