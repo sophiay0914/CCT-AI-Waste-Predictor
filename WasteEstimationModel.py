@@ -38,14 +38,17 @@ zipcode_from = st.text_input("Enter your origin ZIP code").strip()
 
 
 # Step 3: Data Processing if Input is Valid
-if uploaded_file is None:
-    st.info("Please upload your CSV file.")
-elif uploaded_file.type != "text/csv":
-    st.warning("Please upload a CSV file.")
-if zipcode_from == "":
-    st.info("Please enter your ZIP code.")
-elif not(zipcode_from.isdigit()) or len(zipcode_from) != 5:
-    st.warning("Please enter a valid 5-digit origin ZIP code.")
+while true:
+    if uploaded_file is None:
+        st.info("Please upload your CSV file.")
+    elif uploaded_file.type != "text/csv":
+        st.warning("Please upload a CSV file.")
+    if zipcode_from == "":
+        st.info("Please enter your ZIP code.")
+    elif not(zipcode_from.isdigit()) or len(zipcode_from) != 5:
+        st.warning("Please enter a valid 5-digit origin ZIP code.")
+    else:
+        break
 
 #if uploaded_file is None or uploaded_file.type != "text/csv" or zipcode_from == "" or not zipcode_from.isdigit() or len(zipcode_from) != 5:
     
