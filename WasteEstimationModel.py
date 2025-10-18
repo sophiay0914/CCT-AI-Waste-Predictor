@@ -51,10 +51,10 @@ CATEGORIES = [
 business_category = st.selectbox("Select your business category", CATEGORIES, index=0)
 
 # Step 3: Data Processing if Input is Valid
-if uploaded_file is not None and uploaded_file.type != "text/csv":
-    st.warning("Please upload a CSV file.")
-if zipcope_from != "" and not(zipcode_from.isdigit()) or len(zipcode_from) != 5:
-    st.warning("Please enter a valid 5-digit origin ZIP code.")
+if uploaded_file is None or uploaded_file.type != "text/csv": 
+    st.warning("Please upload a valid CSV file.") 
+if zipcode_from == "" or len(zipcode_from) != 5: 
+    st.warning("Please enter a valid 5-digit origin ZIP code.") 
 
 if uploaded_file is not None and uploaded_file.type == "text/csv" and zipcode_from != "" and zipcode_from.isdigit() and len(zipcode_from) == 5 and st.session_state.get("biz_category") is not None:
     # Step 4: Read in sold order data
