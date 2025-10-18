@@ -51,7 +51,7 @@ CATEGORIES = [
 category = st.selectbox("Select your business category", CATEGORIES, index=0)
 
 # Step 3: Data Processing if Input is Valid
-if not uploaded_file and not zipcode_from and category == "— Select —":
+if uploaded_file is None and not zipcode_from and category == "— Select —":
     st.info("Please upload your CSV file, enter your ZIP code, and select your business category.")
 if uploaded_file is not None and uploaded_file.type != "text/csv": 
     st.warning("Please upload a CSV file.") 
