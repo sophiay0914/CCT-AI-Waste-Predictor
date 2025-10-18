@@ -47,61 +47,70 @@ if zipcode_from == "":
 elif not(zipcode_from.isdigit()) or len(zipcode_from) != 5:
     st.warning("Please enter a valid 5-digit origin ZIP code.")
 
-
-if uploaded_file is not None and uploaded_file.type == "text/csv" and zipcode_from != "" and zipcode_from.isdigit() and len(zipcode_from) == 5:
-    # Step 4: Read in sold order data
-    df_order = pd.read_csv(uploaded_file)
-    df_order['zipcode_to'] = df_order['Ship Zipcode'].astype(str).str[:5]
-
-    # Step 5: Calculate distance bewtween origin zip code and destination
-    dist = pgeocode.GeoDistance('us')
-    df_order['distance_miles'] = df_order['zipcode_to'].apply(
-        lambda dest: dist.query_postal_code(zipcode_from, dest) * 0.621371
-    )
-
-    # Assign distance categories
-    conditions = [
-        df_order['distance_miles'] <= 50,
-        (df_order['distance_miles'] > 50) & (df_order['distance_miles'] <= 150),
-        (df_order['distance_miles'] > 150) & (df_order['distance_miles'] <= 300),
-        (df_order['distance_miles'] > 300) & (df_order['distance_miles'] <= 600),
-        (df_order['distance_miles'] > 600) & (df_order['distance_miles'] <= 1000),
-        (df_order['distance_miles'] > 1000) & (df_order['distance_miles'] <= 1400),
-        (df_order['distance_miles'] > 1400) & (df_order['distance_miles'] <= 1800),
-        df_order['distance_miles'] > 1800
-    ]
-    choices = list(range(1, 9))
-    df_order['distance_cat'] = np.select(conditions, choices, default=np.nan).astype(int)
-    # if foreign country, set it as 8
-    df_order.loc[df_order['distance_miles'].isna(), 'distance_cat'] = 8
-    df_order_new = df_order[(df_order["distance_cat"] >=1) & (df_order["distance_cat"] <=8) ]
+#if uploaded_file is None or uploaded_file.type != "text/csv" or zipcode_from == "" or not zipcode_from.isdigit() or len(zipcode_from) != 5:
     
-    # Function to match USPS rate table
-    def match_weight(distance_cat, shipping_cost):
-        zone_col = f"Zone {distance_cat}"
-        diffs = (df_rate[zone_col] - shipping_cost).abs()
-        best_idx = diffs.idxmin()
-        return df_rate.loc[best_idx, 'weight']
+# Step 4: Read in sold order data
+df_order = pd.read_csv(uploaded_file)
+df_order['zipcode_to'] = df_order['Ship Zipcode'].astype(str).str[:5]
 
-    df_order['shipping_cost'] = df_order['Order Shipping'] / 0.78
-    df_order['matched_weight'] = df_order.apply(lambda r: match_weight(r['distance_cat'], r['shipping_cost']), axis=1)
-    # 20% of weight is package weight
-    df_order['package_weight'] = df_order['matched_weight'] * 0.2
-    df_order['Sale Date'] = pd.to_datetime(df_order['Sale Date'])
-    df_order = df_order.sort_values('Sale Date')
+# Step 5: Calculate distance bewtween origin zip code and destination
+dist = pgeocode.GeoDistance('us')
+df_order['distance_miles'] = df_order['zipcode_to'].apply(
+    lambda dest: dist.query_postal_code(zipcode_from, dest) * 0.621371
+)
+
+# Assign distance categories
+conditions = [
+    df_order['distance_miles'] <= 50,
+    (df_order['distance_miles'] > 50) & (df_order['distance_miles'] <= 150),
+    (df_order['distance_miles'] > 150) & (df_order['distance_miles'] <= 300),
+    (df_order['distance_miles'] > 300) & (df_order['distance_miles'] <= 600),
+    (df_order['distance_miles'] > 600) & (df_order['distance_miles'] <= 1000),
+    (df_order['distance_miles'] > 1000) & (df_order['distance_miles'] <= 1400),
+    (df_order['distance_miles'] > 1400) & (df_order['distance_miles'] <= 1800),
+    df_order['distance_miles'] > 1800
+]
+choices = list(range(1, 9))
+df_order['distance_cat'] = np.select(conditions, choices, default=np.nan).astype(int)
+# if foreign country, set it as 8
+df_order.loc[df_order['distance_miles'].isna(), 'distance_cat'] = 8
+df_order_new = df_order[(df_order["distance_cat"] >=1) & (df_order["distance_cat"] <=8) ]
+    
+# Function to match USPS rate table
+def match_weight(distance_cat, shipping_cost):
+    zone_col = f"Zone {distance_cat}"
+    diffs = (df_rate[zone_col] - shipping_cost).abs()
+    best_idx = diffs.idxmin()
+    return df_rate.loc[best_idx, 'weight']
+
+df_order['shipping_cost'] = df_order['Order Shipping'] / 0.78
+df_order['matched_weight'] = df_order.apply(lambda r: match_weight(r['distance_cat'], r['shipping_cost']), axis=1)
+# 20% of weight is package weight
+df_order['package_weight'] = df_order['matched_weight'] * 0.2
+df_order['Sale Date'] = pd.to_datetime(df_order['Sale Date'])
+df_order = df_order.sort_values('Sale Date')
 
 
 
-    st.divider()
-    # Step 6: Visualization
-    # Total estimated waste
+st.divider()
+
+# Step 6: ================== VISUALIZATION TABS ==================
+tab_summary, tab_trends, tab_states = st.tabs([
+    "Summary",
+    "Packaging Waste Trends",
+    "Packaging Waste by State",
+])
+# ---------- SUMMARY TAB ----------
+# Total estimated waste
+with tab_summary:
     total_waste = df_order['package_weight'].sum()
     year = df_order['Sale Date'].dt.year.mode()[0]
     st.subheader("Total Estimated Packaging Waste (lbs)")
     st.markdown(f"<h2 style='color:green;'>{round(total_waste, 2)} lbs</h2>", unsafe_allow_html=True)
 
-    st.divider()
-    # Packaging Waste Trends
+# ---------- TRENDS TAB ----------
+# Packaging Waste Trends
+with tab_trends:
     st.subheader("Packaging Waste Trends")
     col1, spacer, col2 = st.columns([1, 0.2, 1])
 
@@ -154,9 +163,9 @@ if uploaded_file is not None and uploaded_file.type == "text/csv" and zipcode_fr
         )
         st.plotly_chart(fig3)
 
-
-    st.divider()
-    # State-level analysis
+# ---------- BY STATE TAB ----------
+# State-level analysis
+with tab_states:
     st.subheader("Packaging Waste by State")
     us_sales = df_order[df_order['Ship Country'] == 'United States']
     state_sales = us_sales.groupby('Ship State')['package_weight'].sum().reset_index()
@@ -188,9 +197,10 @@ if uploaded_file is not None and uploaded_file.type == "text/csv" and zipcode_fr
 
     st.table(top_states.reset_index(drop=True).style.hide(axis='index'))
 
-st.divider()
+    st.divider()
 
-# ---------- Rule-based conversation graph (edit this to fit your flows) ----------
+
+# ================== CHATBOT ==================
 FLOW = {
     "start": {
         "text": "Hi! I’m here to help you start your sustainability journey based off of your results. What do you need?",
