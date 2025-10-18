@@ -327,29 +327,38 @@ if "current_node" not in st.session_state:
     st.session_state.current_node = "start"
 if "form_data" not in st.session_state:
     st.session_state.form_data = {}
-if "chat_initialized" not in st.session_state:
-    # Seed the first message once
-    st.session_state.chat_initialized = True
-    st.session_state.history.append(
-        {"role": "assistant", "content": FLOW["start"]["text"]}
-    )
+# tracks whether we've already shown the start greeting
+if "start_message_shown" not in st.session_state:
+    st.session_state.start_message_shown = False
+# tracks whether we've bootstrapped the chat once
+if "bootstrapped" not in st.session_state:
+    st.session_state.bootstrapped = False
 
 def go(node_id: str):
     st.session_state.current_node = node_id
-    if node_id == "start" and any("Hi! I’m here to help" in m["content"] for m in st.session_state.history):
-        return
     node = FLOW[node_id]
+
+    # Only add the Start greeting the first time ever
+    if node_id == "start":
+        if st.session_state.start_message_shown:
+            return  # we've already shown the greeting once
+        st.session_state.start_message_shown = True
+
     st.session_state.history.append({"role": "assistant", "content": node["text"]})
 
 def reset_chat():
-    st.session_state.history = [{"role": "assistant", "content": FLOW["start"]["text"]}]
+    st.session_state.history = []
     st.session_state.current_node = "start"
     st.session_state.form_data = {}
+    st.session_state.start_message_shown = False
+    st.session_state.bootstrapped = False
+    go("start")
 
-def _handle_option_click(label: str, next_node: str):
-    # Called by option buttons; no rerun needed
-    st.session_state.history.append({"role": "user", "content": label})
-    go(next_node)
+# Bootstrap the very first time the app loads
+if not st.session_state.bootstrapped:
+    st.session_state.bootstrapped = True
+    go("start")
+
 
 # ---------- Chat UI renderer (used inside the floating widget) ----------
 def render_chat_ui():
