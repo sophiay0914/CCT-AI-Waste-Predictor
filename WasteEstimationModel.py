@@ -50,6 +50,20 @@ CATEGORIES = [
 ]
 category = st.selectbox("Select your business category", CATEGORIES, index=0)
 
+# Packaging weight fraction defaults by category (fraction of shipped weight)
+CATEGORY_PACKAGING_FRACTION = {
+    "Jewelry & Accessories": 0.20,     # small item + protective mailer/paper
+    "Clothing": 0.08,                  # poly/paper mailer + minimal inner wrap
+    "Home & Living": 0.05,             # larger/heavier items; packaging is a smaller share
+    "Art & Prints": 0.15,              # rigid mailers/tubes + flat protection
+    "Bags & Purses": 0.10,
+    "Bath, Beauty, & Health": 0.12,    # jars/tins/inner wraps can add weight
+    "Toys, Games, & Kids": 0.09,
+    "Books, Music, & Media": 0.07,     # rigid mailer/box, modest padding
+    "Food & Beverages": 0.12,          # food-safe inner + cushioning
+    "Stationery & Small Gifts": 0.19,
+}
+
 # Step 3: Data Processing if Input is Valid
 is_valid_csv = (uploaded_file is not None) and (uploaded_file.type == "text/csv")
 is_valid_zip = (zipcode_from != "") and zipcode_from.isdigit() and (len(zipcode_from) == 5)
@@ -307,6 +321,7 @@ FLOW = {
 
     "recommendation": {
         "text": "Based on your selected category and statistical results, here is my recommendations personalized for you!",
+       
         "options": [
             {"label": "Back to Start", "next": "start"},
         ],
