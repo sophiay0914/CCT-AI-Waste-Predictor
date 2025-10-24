@@ -411,7 +411,7 @@ def build_recommendation_text():
         return "Please select a business category above and run the analysis first. This will help give you the most personalized reocommendations."
     recs = CATEGORY_RECOMMENDATIONS[selected_cat]
 
-    rec_list = "\n".join([f"• {item}" for item in recs])
+    rec_list = "\n".join([f"{item}" for item in recs])
     return "Based on your business category and statistical results, here is my recommendations personalized for you!" + "\n\n" + rec_list
 
     
