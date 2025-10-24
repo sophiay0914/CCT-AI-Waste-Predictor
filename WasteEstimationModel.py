@@ -225,7 +225,7 @@ else:
         })
         top_states.insert(0, 'Rank', range(1, 6))
     
-        st.table(top_states.reset_index(drop=True).style.hide(axis='index'))
+        st.table(top_states.reset_index(drop=True))
     
         st.divider()
 
