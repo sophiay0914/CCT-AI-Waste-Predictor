@@ -385,7 +385,7 @@ def render_chat_ui():
     c1, c2 = st.columns(2)
     c1.button("⟳ Restart", use_container_width=True, on_click=reset_chat)
     c2.download_button(
-        "⬇️ Export transcript",
+        "↓ Export transcript",
         data="\n".join([f'{m["role"]}: {m["content"]}' for m in st.session_state.history]),
         file_name="chat_transcript.txt",
         use_container_width=True
