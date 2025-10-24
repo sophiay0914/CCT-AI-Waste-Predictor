@@ -302,7 +302,7 @@ FLOW = {
             {"label": "🎁 Product Wrapping/Containers", "next": "product_wrapping_containers"},
             {"label": "🏷️ Sealing & Labeling", "next": "sealing_labeling"},
             {"label": "💌Inserts & Extras", "next": "inserts_extras"},
-            {"label": "<- Back", "next": "start"},
+            {"label": "← Back", "next": "start"},
         ],
     },
     "outer_packaging": {
@@ -311,65 +311,60 @@ FLOW = {
         "• **Honeycomb Mailers** – paper-based padded mailers that replace plastic bubble mailers. Fully recyclable and perfect for jewelry, accessories, and clothing\n\n" 
         "• **Compostable Mailers** – made from cornstarch or PLA, these decompose naturally and replace traditional poly mailers\n\n"
         "• **Cardboard Boxes** – sturdy, biodegradable boxes ideal for fragile home decor or art\n\n"
-        "• **Rigid Paper Mailers** – great for art prints, books, and documents — recyclable and plastic-free\n\n",
-        "• **Paper Envelopes** – lightweight, recyclable mailers made from kraft paper. Perfect for flat items such as greeting cards, small prints, or stickers."
+        "• **Rigid Paper Mailers** – great for art prints, books, and documents — recyclable and plastic-free\n\n"
+        "• **Paper Envelopes** – lightweight, recyclable mailers made from kraft paper. Perfect for flat items such as greeting cards, small prints, or stickers"
         ),
         "options": [
-            {"label": "See pricing", "next": "pricing"},
-            {"label": "<- Back to Products", "next": "product_catalog"},
+            {"label": "← Back to Products", "next": "product_catalog"},
         ],
     },
     "inner_packaging": {
         "text": (
             "Inner packaging cushions and protects your items while avoiding plastic:\n\n"
-            "• **Honeycomb Packing Paper** – expands to create a flexible paper wrap that replaces bubble wrap.\n\n"
-            "• **Shredded Kraft Paper** – made from recycled paper, provides eco-friendly cushioning for fragile items.\n\n"
-            "• **Tissue Paper** – adds presentation and protection for jewelry, accessories, or clothing.\n\n"
-            "• **Mushroom Packaging** – grown from mycelium and compostable, perfect for glass or ceramic goods."
+            "• **Honeycomb Packing Paper** – expands to create a flexible paper wrap that replaces bubble wrap\n\n"
+            "• **Shredded Kraft Paper** – made from recycled paper, provides eco-friendly cushioning for fragile items\n\n"
+            "• **Tissue Paper** – adds presentation and protection for jewelry, accessories, or clothing\n\n"
+            "• **Mushroom Packaging** – grown from mycelium and compostable, perfect for glass or ceramic goods"
         ),
         "options": [
-            {"label": "See pricing", "next": "pricing"},
-            {"label": "<- Back to Products", "next": "product_catalog"},
+            {"label": "← Back to Products", "next": "product_catalog"},
         ],
     },
     "product_wrapping_containers": {
         "text": (
             "Product wrapping and containers hold or present your items sustainably:\n\n"
-            "• **Glassine Bags** – translucent and biodegradable, used for jewelry, prints, and soaps.\n\n"
-            "• **Kraft Paper Wrap** – recyclable paper for wrapping clothing or small home goods.\n\n"
-            "• **Aluminum or Tin Containers** – reusable and recyclable, ideal for candles or beauty products.\n\n"
-            "• **Glass Jars / Bottles** – plastic-free option for bath salts, scrubs, or beverages.\n\n"
-            "• **Cardboard Tubes / Boxes** – used for art, posters, or apparel — fully recyclable."
+            "• **Glassine Bags** – translucent and biodegradable, used for jewelry, prints, and soaps\n\n"
+            "• **Kraft Paper Wrap** – recyclable paper for wrapping clothing or small home goods\n\n"
+            "• **Aluminum or Tin Containers** – reusable and recyclable, ideal for candles or beauty products\n\n"
+            "• **Glass Jars / Bottles** – plastic-free option for bath salts, scrubs, or beverages\n\n"
+            "• **Cardboard Tubes / Boxes** – used for art, posters, or apparel — fully recyclable"
         ),
         "options": [
-            {"label": "See pricing", "next": "pricing"},
-            {"label": "<- Back to Products", "next": "product_catalog"},
+            {"label": "← Back to Products", "next": "product_catalog"},
         ],
     },
     "sealing_labeling": {
         "text": (
             "Sealing and labeling materials keep your packaging closed and branded without plastic:\n\n"
-            "• **Kraft Paper Tape** – water-activated tape that’s 100% recyclable.\n\n"
-            "• **Compostable Labels** – made from sugarcane or PLA film; biodegradable and customizable.\n\n"
-            "• **Paper Stickers** – recyclable labels with soy-based inks.\n\n"
-            "• **Hemp Twine** – replaces plastic string for rustic and eco branding."
+            "• **Kraft Paper Tape** – water-activated tape that’s 100% recyclable\n\n"
+            "• **Compostable Labels** – made from sugarcane or PLA film; biodegradable and customizable\n\n"
+            "• **Paper Stickers** – recyclable labels with soy-based inks\n\n"
+            "• **Hemp Twine** – replaces plastic string for rustic and eco branding"
         ),
         "options": [
-            {"label": "Get a quote", "next": "quote_form"},
-            {"label": "<- Back to Products", "next": "start"},
+            {"label": "← Back to Products", "next": "product_catalog"},
         ],
     },
     "inserts_extras": {
         "text": (
             "Inserts and extras enhance presentation and promote sustainability:\n\n"
-            "• **Paper Thank-You Cards** – made from post-consumer paper or seed paper that can be planted.\n\n"
-            "• **Paper Tags** – biodegradable tags that grow wildflowers or herbs.\n\n"
-            "• **Paper Crinkle Fill** – replaces plastic confetti for cushioning and aesthetics.\n\n"
-            "• **QR Code Cards** – encourage paperless communication by linking to digital care instructions or sustainability stories."
+            "• **Paper Thank-You Cards** – made from post-consumer paper or seed paper that can be planted\n\n"
+            "• **Paper Tags** – biodegradable tags that grow wildflowers or herbs\n\n"
+            "• **Paper Crinkle Fill** – replaces plastic confetti for cushioning and aesthetics\n\n"
+            "• **QR Code Cards** – encourage paperless communication by linking to digital care instructions or sustainability stories"
         ),
         "options": [
-            {"label": "Get a quote", "next": "quote_form"},
-            {"label": "<- Back to Products", "next": "start"},
+            {"label": "← Back to Products", "next": "product_catalog"},
         ],
     },
 
