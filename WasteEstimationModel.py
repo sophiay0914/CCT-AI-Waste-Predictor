@@ -392,7 +392,7 @@ FLOW = {
 
 def build_recommendation_text():
     selected_cat = category
-    if (selected_cat not in CATEGORY_RECOMMENDATIONS:
+    if (selected_cat not in CATEGORY_RECOMMENDATIONS):
         return "Please selecte a business category above and run the analysis first. This will help give you the most personalized reocommendations."
     recs = CATEGORY_RECOMMENDATIONS[selected_cat]
 
