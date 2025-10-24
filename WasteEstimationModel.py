@@ -253,55 +253,55 @@ if st.session_state.analysis_ready and st.session_state.df_order is not None:
 # ================== CHATBOT ==================
 CATEGORY_RECOMMENDATIONS = {
     "Jewelry & Accessories": [
-        "1. Switch plastic bubble mailers → honeycomb padded paper mailers (curbside recyclable) \n\n"
+        "1. Switch from plastic bubble mailers to honeycomb padded paper mailers \n\n"
         "2. Wrap items in honeycomb packing paper instead of plastic bubble wrap \n\n"
         "3. Use glassine bags instead of plastic zip bags for earrings/charms \n\n"
         "4. Seal with kraft paper tape instead of plastic tape"
     ],
     "Clothing": [
-        "Replace poly mailers with recycled paper mailers or compostable mailers \n\n"
-        "Wrap garments in kraft/tissue instead of poly sleeves \n\n"
-        "Use paper stickers / soy ink labels instead of vinyl logo stickers"
+        "1. Replace poly mailers with recycled paper mailers or compostable mailers \n\n"
+        "2. Wrap garments in kraft/tissue instead of poly sleeves \n\n"
+        "3. Use paper stickers / soy ink labels instead of vinyl logo stickers"
     ],
     "Home & Living": [
-        "Use cardboard boxes sized to the product to avoid excess filler \n\n"
-        "Pad with shredded kraft or honeycomb wrap instead of air pillows \n\n"
-        "Use paper-based tape and include reuse note ('please reuse this box')"
+        "1. Use cardboard boxes sized to the product to avoid excess filler \n\n"
+        "2. Pad with shredded kraft or honeycomb wrap instead of air pillows \n\n"
+        "3. Use paper-based tape and include reuse note"
     ],
     "Art & Prints": [
-        "Ship in rigid paper mailers or cardboard tubes instead of bubble mailers \n\n"
-        "Protect prints with glassine sleeves instead of plastic sleeves \n\n"
-        "Add corner protectors made of folded kraft cardstock (no foam corners)"
+        "1. Ship in rigid paper mailers or cardboard tubes instead of bubble mailers \n\n"
+        "2. Protect prints with glassine sleeves instead of plastic sleeves \n\n"
+        "3. Add corner protectors made of folded kraft cardstock (no foam corners)"
     ],
     "Bags & Purses": [
-        "Use recycled kraft paper wrap instead of poly dust bags \n\n"
-        "Seal boxes with water-activated kraft tape (plastic-free branding) \n\n"
-        "Swap plastic hang tags for paper swing tags + hemp twine"
+        "1. Use recycled kraft paper wrap instead of poly dust bags \n\n"
+        "2. Seal boxes with water-activated kraft tape \n\n"
+        "3. Swap plastic hang tags for paper swing tags or hemp twine"
     ],
     "Bath, Beauty, & Health": [
-        "Use tins / glass jars instead of plastic containers where possible \n\n"
-        "Cushion jars with honeycomb wrap or crinkle paper, not bubble wrap \n\n"
-        "Use compostable labels instead of glossy plastic labels"
+        "1. Use tins / glass jars instead of plastic containers where possible \n\n"
+        "2. Cushion jars with honeycomb wrap or crinkle paper, not bubble wrap \n\n"
+        "3. Use compostable labels instead of glossy plastic labels"
     ],
     "Toys, Games, & Kids": [
-        "Use cardboard mailers or boxes sized tight to reduce filler \n\n"
-        "Replace plastic air pillows with kraft paper fill \n\n"
-        "Avoid polybags around soft toys; wrap in tissue instead"
+        "1. Use cardboard mailers or boxes sized tight to reduce filler \n\n"
+        "2. Replace plastic air pillows with kraft paper fill \n\n"
+        "3. Avoid polybags around soft toys; wrap in tissue instead"
     ],
     "Books, Music, & Media": [
-        "Use rigid cardboard mailers sized to fit instead of bubble mailers \n\n"
-        "Pad edges with folded kraft paper strips, not foam blocks \n\n"
-        "Seal with paper tape so the entire package is recyclable as cardboard"
+        "1. Use rigid cardboard mailers sized to fit instead of bubble mailers \n\n"
+        "2. Pad edges with folded kraft paper strips, not foam blocks \n\n"
+        "3. Seal with paper tape so the entire package is recyclable as cardboard"
     ],
     "Food & Beverages": [
-        "Use molded fiber / mushroom packaging instead of foam or plastic shells \n\n"
-        "Use paper-based tamper seals instead of plastic shrink bands \n\n"
-        "Choose paper-based filler that’s FDA/food-safe when possible"
+        "1. Use molded fiber / mushroom packaging instead of foam or plastic shells \n\n"
+        "2. Use paper-based tamper seals instead of plastic shrink bands \n\n"
+        "3. Choose paper-based filler that’s FDA/food-safe when possible"
     ],
     "Stationery & Small Gifts": [
-        "Ship in honeycomb or rigid mailers instead of bubble mailers \n\n"
-        "Use glassine sleeves for cards/stickers instead of poly sleeves \n\n"
-        "Swap poly logo mailer for recycled kraft mailer with paper sticker seal"
+        "1. Ship in honeycomb or rigid mailers instead of bubble mailers \n\n"
+        "2. Use glassine sleeves for cards/stickers instead of poly sleeves \n\n"
+        "3. Swap poly logo mailer for recycled kraft mailer with paper sticker seal"
     ],
 }
 
