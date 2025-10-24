@@ -11,13 +11,19 @@ st.title("Waste Estimation Model")
 
 if "analysis_ready" not in st.session_state:
     st.session_state.analysis_ready = False  # did we already run analysis successfully?
-
 if "df_order" not in st.session_state:
     st.session_state.df_order = None
-
 if "total_waste" not in st.session_state:
     st.session_state.total_waste = None
-    
+
+if not st.session_state.analysis_ready:        
+    if uploaded_file is None:
+        st.info("Action 1: Please upload your Sold Orders CSV file above.")
+    elif zipcode_from and (not zipcode_from.isdigit() or len(zipcode_from) != 5):
+        st.warning("Action 2: please enter a valid 5-digit origin ZIP code.")
+    elif category == "— Select —":
+        st.info("Action 3: Please select your business category.")
+        
 # Step 1: Create USPS Shipping Rate Table
 rate = {
     "weight": [
@@ -128,14 +134,6 @@ if run_clicked:
     st.session_state.total_waste = df_order['package_weight'].sum()
     st.session_state.analysis_ready = True
     
-
-if not st.session_state.analysis_ready:        
-    if uploaded_file is None:
-        st.info("Action 1: Please upload your Sold Orders CSV file above.")
-    elif zipcode_from and (not zipcode_from.isdigit() or len(zipcode_from) != 5):
-        st.warning("Action 2: please enter a valid 5-digit origin ZIP code.")
-    elif category == "— Select —":
-        st.info("Action 3: Please select your business category.")
 
 if st.session_state.analysis_ready and st.session_state.df_order is not None:
     df_order = st.session_state.df_order.copy()
