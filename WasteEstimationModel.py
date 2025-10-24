@@ -107,7 +107,7 @@ if run_clicked:
     df_order['distance_cat'] = np.select(conditions, choices, default=np.nan).astype(int)
     # if foreign country, set it as 8
     df_order.loc[df_order['distance_miles'].isna(), 'distance_cat'] = 8
-    df_order_new = df_order[(df_order["distance_cat"] >=1) & (df_order["distance_cat"] <=8) ]
+    #df_order_new = df_order[(df_order["distance_cat"] >=1) & (df_order["distance_cat"] <=8) ]
         
     # Function to match USPS rate table
     def match_weight(distance_cat, shipping_cost):
@@ -119,7 +119,8 @@ if run_clicked:
     df_order['shipping_cost'] = df_order['Order Shipping'] / 0.78
     df_order['matched_weight'] = df_order.apply(lambda r: match_weight(r['distance_cat'], r['shipping_cost']), axis=1)
     # 20% of weight is package weight
-    df_order['package_weight'] = df_order['matched_weight'] * 0.2
+    frac = CATEGORY_PACKAGING_FRACTION.get(category)
+    df_order['package_weight'] = df_order['matched_weight'] * frac
     df_order['Sale Date'] = pd.to_datetime(df_order['Sale Date'])
     df_order = df_order.sort_values('Sale Date')
     # store results so we don't lose them on rerun
@@ -128,121 +129,125 @@ if run_clicked:
     st.session_state.analysis_ready = True
     
 
-    if not st.session_state.analysis_ready:
-        if uploaded_file is None and not zipcode_from and not is_valid_cat:
-            st.info("Please upload your CSV file, enter your ZIP code, and select your business category.")
-        if zipcode_from and (not(zipcode_from.isdigit()) or len(zipcode_from) != 5): 
-            st.warning("Please enter a valid 5-digit origin ZIP code.")
+if not st.session_state.analysis_ready:        
+    if uploaded_file is None:
+        st.info("Please upload your Sold Orders CSV file above.")
+    if zipcode_from and (not zipcode_from.isdigit() or len(zipcode_from) != 5):
+        st.warning("Next: please enter a valid 5-digit origin ZIP code.")
+    if category == "— Select —":
+        st.info("Next: Please select your business category.")
 
-    if st.session_state.analysis_ready and st.session_state.df_order is not None:
-        df_order = st.session_state.df_order.copy()
-        st.divider()
+if st.session_state.analysis_ready and st.session_state.df_order is not None:
+    df_order = st.session_state.df_order.copy()
         
-        # Step 6: ================== VISUALIZATION TABS ==================
-        tab_summary, tab_trends, tab_states = st.tabs([
-            "Summary",
-            "Packaging Waste Trends",
-            "Packaging Waste by State",
-        ])
-        # ---------- SUMMARY TAB ----------
-        # Total estimated waste
-        with tab_summary:
-            total_waste = df_order['package_weight'].sum()
-            year = df_order['Sale Date'].dt.year.mode()[0]
-            st.subheader("Total Estimated Packaging Waste (lbs)")
-            st.markdown(f"<h2 style='color:green;'>{round(total_waste, 2)} lbs</h2>", unsafe_allow_html=True)
+    st.divider()
+    
+    # Step 6: ================== VISUALIZATION TABS ==================
+    tab_summary, tab_trends, tab_states = st.tabs([
+        "Summary",
+        "Packaging Waste Trends",
+        "Packaging Waste by State",
+    ])
+    # ---------- SUMMARY TAB ----------
+    # Total estimated waste
+    with tab_summary:
+        total_waste = df_order['package_weight'].sum()
+        year = df_order['Sale Date'].dt.year.mode()[0]
+        st.subheader("Total Estimated Packaging Waste (lbs)")
+        st.markdown(f"<h2 style='color:green;'>{round(total_waste, 2)} lbs</h2>", unsafe_allow_html=True)
         
-        # ---------- TRENDS TAB ----------
-        # Packaging Waste Trends
-        with tab_trends:
-            st.subheader("Packaging Waste Trends")
-            col1, spacer, col2 = st.columns([1, 0.2, 1])
+    # ---------- TRENDS TAB ----------
+    # Packaging Waste Trends
+    with tab_trends:
+        st.subheader("Packaging Waste Trends")
+        col1, spacer, col2 = st.columns([1, 0.2, 1])
+    
+        with col1: # monthly waste
+            monthly = df_order.resample('M', on='Sale Date')['package_weight'].sum().reset_index()
+            monthly['Month'] = monthly['Sale Date'].dt.strftime('%b')  # Format like "Jan"
+    
+            tab1, tab2 = st.tabs(["📊 Bar Chart", "📈 Line Graph"])
         
-            with col1: # monthly waste
-                monthly = df_order.resample('M', on='Sale Date')['package_weight'].sum().reset_index()
-                monthly['Month'] = monthly['Sale Date'].dt.strftime('%b')  # Format like "Jan"
-        
-                tab1, tab2 = st.tabs(["📊 Bar Chart", "📈 Line Graph"])
-        
-                with tab1: # bar chart
-                    fig1 = px.bar(
-                        monthly,
-                        x='Month',
-                        y='package_weight',
-                        title='Monthly Waste: Bar Chart',
-                        color_discrete_sequence=['green']
-                    )
-                    fig1.update_layout(
-                        xaxis_title='Month',
-                        yaxis_title='Waste Weight (lb)'
-                    )                
-                    st.plotly_chart(fig1)
-        
-                with tab2: # line graph
-                    fig2 = px.line(
-                        monthly,
-                        x='Month',
-                        y='package_weight',
-                        title='Monthly Waste: Line Graph',
-                        line_shape='linear'
-                    )
-                    fig2.update_traces(line_color='green')
-                    fig2.update_layout(
-                        xaxis_title='Month', 
-                        yaxis_title='Waste Weight (lb)'
-                    )
-                    st.plotly_chart(fig2)
-            
-            with col2: # cumulative line graph
-                df_order['Cumulative Waste'] = df_order['package_weight'].cumsum()
-                fig3 = px.line(
-                    df_order, 
-                    x='Sale Date',
-                    y='Cumulative Waste', 
-                    title='Cumulative Waste Over Time'
+            with tab1: # bar chart
+                fig1 = px.bar(
+                    monthly,
+                    x='Month',                        
+                    y='package_weight',
+                    title='Monthly Waste: Bar Chart',
+                    color_discrete_sequence=['green']
                 )
-                fig3.update_traces(line_color='green')
-                fig3.update_layout(
-                    xaxis_title='Date', 
+                fig1.update_layout(
+                    xaxis_title='Month',
+                    yaxis_title='Waste Weight (lb)'
+                )                
+                st.plotly_chart(fig1)
+        
+            with tab2: # line graph
+                fig2 = px.line(
+                    monthly,
+                    x='Month',
+                    y='package_weight',
+                    title='Monthly Waste: Line Graph',
+                    line_shape='linear'
+                )
+                fig2.update_traces(line_color='green')
+                fig2.update_layout(
+                    xaxis_title='Month', 
                     yaxis_title='Waste Weight (lb)'
                 )
-                st.plotly_chart(fig3)
-        
-        # ---------- GEOGRAPHIC TAB ----------
-        # State-level analysis
-        with tab_states:
-            st.subheader("Packaging Waste by State")
-            us_sales = df_order[df_order['Ship Country'] == 'United States']
-            state_sales = us_sales.groupby('Ship State')['package_weight'].sum().reset_index()
-            # U.S. State Choropleth Map
-            fig4 = px.choropleth(
-                state_sales,            
-                locations='Ship State',
-                locationmode='USA-states',
-                color='package_weight',
-                scope='usa',
-                color_continuous_scale='Greens',
-                labels={'package_weight': 'Waste Weight (lb)'},
-                title='Waste by U.S. State'
+                st.plotly_chart(fig2)
+            
+        with col2: # cumulative line graph
+            df_order['Cumulative Waste'] = df_order['package_weight'].cumsum()
+            fig3 = px.line(
+                df_order, 
+                x='Sale Date',
+                y='Cumulative Waste', 
+                title='Cumulative Waste Over Time'
             )
-            fig4.update_layout(
-                coloraxis_colorbar_title="Waste (lb)",
-                width=1200,
-                height=700
+            fig3.update_traces(line_color='green')
+            fig3.update_layout(
+                xaxis_title='Date', 
+                yaxis_title='Waste Weight (lb)'
             )
-            st.plotly_chart(fig4, use_container_width=True)
+            st.plotly_chart(fig3)
+                
         
-            # Top 5 States Tables
-            top_states = state_sales.sort_values(by='package_weight', ascending=False).head(5)
-            top_states = top_states.rename(columns={
-                'Ship State': 'State',
-                'package_weight': 'Total Waste Weight (lb)'
-            })
-            top_states.insert(0, 'Rank', range(1, 6))
+    # ---------- GEOGRAPHIC TAB ----------
+    # State-level analysis
+    with tab_states:
+        st.subheader("Packaging Waste by State")
+        us_sales = df_order[df_order['Ship Country'] == 'United States']
+        state_sales = us_sales.groupby('Ship State')['package_weight'].sum().reset_index()
+        # U.S. State Choropleth Map            
+        fig4 = px.choropleth(
+            state_sales,            
+            locations='Ship State',
+            locationmode='USA-states',
+            color='package_weight',
+            scope='usa',
+            color_continuous_scale='Greens',
+            labels={'package_weight': 'Waste Weight (lb)'},
+            title='Waste by U.S. State'
+        )
+        fig4.update_layout(
+            coloraxis_colorbar_title="Waste (lb)",
+            width=1200,
+            height=700
+        )
+        st.plotly_chart(fig4, use_container_width=True)
         
-            st.table(top_states.reset_index(drop=True))
+        # Top 5 States Tables
+        top_states = state_sales.sort_values(by='package_weight', ascending=False).head(5)
+        top_states = top_states.rename(columns={
+            'Ship State': 'State',
+            'package_weight': 'Total Waste Weight (lb)'
+        })
+        top_states.insert(0, 'Rank', range(1, 6))
         
-            st.divider()
+        st.table(top_states.reset_index(drop=True))
+        
+        st.divider()
 
 
 # ================== CHATBOT ==================
@@ -403,7 +408,7 @@ FLOW = {
 def build_recommendation_text():
     selected_cat = category
     if (selected_cat not in CATEGORY_RECOMMENDATIONS):
-        return "Please selecte a business category above and run the analysis first. This will help give you the most personalized reocommendations."
+        return "Please select a business category above and run the analysis first. This will help give you the most personalized reocommendations."
     recs = CATEGORY_RECOMMENDATIONS[selected_cat]
 
     rec_list = "\n".join([f"• {item}" for item in recs])
