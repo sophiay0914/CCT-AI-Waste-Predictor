@@ -9,6 +9,15 @@ import pgeocode
 st.set_page_config(page_title="Waste Estimation Model", layout="wide")
 st.title("Waste Estimation Model")
 
+if "analysis_ready" not in st.session_state:
+    st.session_state.analysis_ready = False  # did we already run analysis successfully?
+
+if "df_order" not in st.session_state:
+    st.session_state.df_order = None
+
+if "total_waste" not in st.session_state:
+    st.session_state.total_waste = None
+    
 # Step 1: Create USPS Shipping Rate Table
 rate = {
     "weight": [
@@ -398,14 +407,6 @@ def build_recommendation_text():
     rec_list = "\n".join([f"• {item}" for item in recs])
     return "Based on your business category and statistical results, here is my recommendations personalized for you!" + "\n\n" + rec_list
 
-if "analysis_ready" not in st.session_state:
-    st.session_state.analysis_ready = False  # did we already run analysis successfully?
-
-if "df_order" not in st.session_state:
-    st.session_state.df_order = None
-
-if "total_waste" not in st.session_state:
-    st.session_state.total_waste = None
     
 # ---------- Session state ----------
 if "history" not in st.session_state:
