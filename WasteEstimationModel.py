@@ -129,8 +129,8 @@ if run_clicked:
 if not st.session_state.analysis_ready:        
     if uploaded_file is None:
         st.info("Action 1: Please upload your Sold Orders CSV file above.")
-    elif zipcode_from and (not zipcode_from.isdigit() or len(zipcode_from) != 5):
-        st.warning("Action 2: please enter a valid 5-digit origin ZIP code.")
+    elif zipcode_from == "" or ((not zipcode_from.isdigit()) or len(zipcode_from) != 5)):
+        st.warning("Action 2: Please enter a valid 5-digit origin ZIP code.")
     elif category == "— Select —":
         st.info("Action 3: Please select your business category.")
 
