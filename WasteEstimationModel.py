@@ -244,7 +244,7 @@ CATEGORY_RECOMMENDATIONS = {
     ],
     "Clothing": [
         "Replace poly mailers with recycled paper mailers or compostable mailers \n\n"
-        "Wrap garments in kraft/tissue instead of poly sleeves \n\n"",
+        "Wrap garments in kraft/tissue instead of poly sleeves \n\n"
         "Use paper stickers / soy ink labels instead of vinyl logo stickers"
     ],
     "Home & Living": [
