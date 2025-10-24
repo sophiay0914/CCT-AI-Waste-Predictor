@@ -81,7 +81,7 @@ all_valid = is_valid_csv and is_valid_zip and is_valid_cat
 
 run_clicked = st.button("►   Run analysis", type="primary", disabled=not all_valid)
 
-if not st.session_state.analysis_ready:
+if run_clicked or not st.session_state.analysis_ready:
     if uploaded_file is None and not zipcode_from and not is_valid_cat:
         st.info("Please upload your CSV file, enter your ZIP code, and select your business category.")
     if zipcode_from and (not(zipcode_from.isdigit()) or len(zipcode_from) != 5): 
