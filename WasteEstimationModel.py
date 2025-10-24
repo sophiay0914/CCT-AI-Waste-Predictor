@@ -72,12 +72,12 @@ all_valid = is_valid_csv and is_valid_zip and is_valid_cat
 
 run_clicked = st.button("►   Run analysis", type="primary", disabled=not all_valid)
 
-if not run_clicked:
+if not st.session_state.analysis_ready:
     if uploaded_file is None and not zipcode_from and not is_valid_cat:
         st.info("Please upload your CSV file, enter your ZIP code, and select your business category.")
     if zipcode_from and (not(zipcode_from.isdigit()) or len(zipcode_from) != 5): 
         st.warning("Please enter a valid 5-digit origin ZIP code.")
-else:
+if st.session_state.analysis_ready and st.session_state.df_order is not None:
     # Step 4: Read in sold order data
     df_order = pd.read_csv(uploaded_file)
     df_order['zipcode_to'] = df_order['Ship Zipcode'].astype(str).str[:5]
@@ -118,6 +118,10 @@ else:
     df_order['package_weight'] = df_order['matched_weight'] * 0.2
     df_order['Sale Date'] = pd.to_datetime(df_order['Sale Date'])
     df_order = df_order.sort_values('Sale Date')
+    # store results so we don't lose them on rerun
+    st.session_state.df_order = df_order
+    st.session_state.total_waste = df_order['package_weight'].sum()
+    st.session_state.analysis_ready = True
     
     
     
@@ -233,55 +237,55 @@ else:
 # ================== CHATBOT ==================
 CATEGORY_RECOMMENDATIONS = {
     "Jewelry & Accessories": [
-        "Switch plastic bubble mailers → honeycomb padded paper mailers (curbside recyclable)",
-        "Wrap items in honeycomb packing paper instead of plastic bubble wrap",
-        "Use glassine bags instead of plastic zip bags for earrings/charms",
-        "Seal with kraft paper tape instead of plastic tape",
+        "1. Switch plastic bubble mailers → honeycomb padded paper mailers (curbside recyclable) \n\n"
+        "2. Wrap items in honeycomb packing paper instead of plastic bubble wrap \n\n"
+        "3. Use glassine bags instead of plastic zip bags for earrings/charms \n\n"
+        "4. Seal with kraft paper tape instead of plastic tape"
     ],
     "Clothing": [
-        "Replace poly mailers with recycled paper mailers or compostable mailers",
-        "Wrap garments in kraft/tissue instead of poly sleeves",
-        "Use paper stickers / soy ink labels instead of vinyl logo stickers",
+        "Replace poly mailers with recycled paper mailers or compostable mailers \n\n"
+        "Wrap garments in kraft/tissue instead of poly sleeves \n\n"",
+        "Use paper stickers / soy ink labels instead of vinyl logo stickers"
     ],
     "Home & Living": [
-        "Use cardboard boxes sized to the product to avoid excess filler",
-        "Pad with shredded kraft or honeycomb wrap instead of air pillows",
-        "Use paper-based tape and include reuse note ('please reuse this box')",
+        "Use cardboard boxes sized to the product to avoid excess filler \n\n"
+        "Pad with shredded kraft or honeycomb wrap instead of air pillows \n\n"
+        "Use paper-based tape and include reuse note ('please reuse this box')"
     ],
     "Art & Prints": [
-        "Ship in rigid paper mailers or cardboard tubes instead of bubble mailers",
-        "Protect prints with glassine sleeves instead of plastic sleeves",
-        "Add corner protectors made of folded kraft cardstock (no foam corners)",
+        "Ship in rigid paper mailers or cardboard tubes instead of bubble mailers \n\n"
+        "Protect prints with glassine sleeves instead of plastic sleeves \n\n"
+        "Add corner protectors made of folded kraft cardstock (no foam corners)"
     ],
     "Bags & Purses": [
-        "Use recycled kraft paper wrap instead of poly dust bags",
-        "Seal boxes with water-activated kraft tape (plastic-free branding)",
-        "Swap plastic hang tags for paper swing tags + hemp twine",
+        "Use recycled kraft paper wrap instead of poly dust bags \n\n"
+        "Seal boxes with water-activated kraft tape (plastic-free branding) \n\n"
+        "Swap plastic hang tags for paper swing tags + hemp twine"
     ],
     "Bath, Beauty, & Health": [
-        "Use tins / glass jars instead of plastic containers where possible",
-        "Cushion jars with honeycomb wrap or crinkle paper, not bubble wrap",
-        "Use compostable labels instead of glossy plastic labels",
+        "Use tins / glass jars instead of plastic containers where possible \n\n"
+        "Cushion jars with honeycomb wrap or crinkle paper, not bubble wrap \n\n"
+        "Use compostable labels instead of glossy plastic labels"
     ],
     "Toys, Games, & Kids": [
-        "Use cardboard mailers or boxes sized tight to reduce filler",
-        "Replace plastic air pillows with kraft paper fill",
-        "Avoid polybags around soft toys; wrap in tissue instead",
+        "Use cardboard mailers or boxes sized tight to reduce filler \n\n"
+        "Replace plastic air pillows with kraft paper fill \n\n"
+        "Avoid polybags around soft toys; wrap in tissue instead"
     ],
     "Books, Music, & Media": [
-        "Use rigid cardboard mailers sized to fit instead of bubble mailers",
-        "Pad edges with folded kraft paper strips, not foam blocks",
-        "Seal with paper tape so the entire package is recyclable as cardboard",
+        "Use rigid cardboard mailers sized to fit instead of bubble mailers \n\n"
+        "Pad edges with folded kraft paper strips, not foam blocks \n\n"
+        "Seal with paper tape so the entire package is recyclable as cardboard"
     ],
     "Food & Beverages": [
-        "Use molded fiber / mushroom packaging instead of foam or plastic shells",
-        "Use paper-based tamper seals instead of plastic shrink bands",
-        "Choose paper-based filler that’s FDA/food-safe when possible",
+        "Use molded fiber / mushroom packaging instead of foam or plastic shells \n\n"
+        "Use paper-based tamper seals instead of plastic shrink bands \n\n"
+        "Choose paper-based filler that’s FDA/food-safe when possible"
     ],
     "Stationery & Small Gifts": [
-        "Ship in honeycomb or rigid mailers instead of bubble mailers",
-        "Use glassine sleeves for cards/stickers instead of poly sleeves",
-        "Swap poly logo mailer for recycled kraft mailer with paper sticker seal",
+        "Ship in honeycomb or rigid mailers instead of bubble mailers \n\n"
+        "Use glassine sleeves for cards/stickers instead of poly sleeves \n\n"
+        "Swap poly logo mailer for recycled kraft mailer with paper sticker seal"
     ],
 }
 
@@ -394,6 +398,15 @@ def build_recommendation_text():
     rec_list = "\n".join([f"• {item}" for item in recs])
     return "Based on your business category and statistical results, here is my recommendations personalized for you!" + "\n\n" + rec_list
 
+if "analysis_ready" not in st.session_state:
+    st.session_state.analysis_ready = False  # did we already run analysis successfully?
+
+if "df_order" not in st.session_state:
+    st.session_state.df_order = None
+
+if "total_waste" not in st.session_state:
+    st.session_state.total_waste = None
+    
 # ---------- Session state ----------
 if "history" not in st.session_state:
     st.session_state.history = []
@@ -485,5 +498,5 @@ def render_chat_ui():
             st.info("End of this path. Use **Restart** to begin again.")
 
 # ---------- Launcher (expander only; no popover anywhere else) ----------
-with st.expander("💬 Get Personalized Recommendations", expanded=False):
+with st.expander("💬 Get Personalized Recommendations", expanded=True):
     render_chat_ui()
