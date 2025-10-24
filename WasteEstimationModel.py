@@ -231,6 +231,60 @@ else:
 
 
 # ================== CHATBOT ==================
+CATEGORY_RECOMMENDATIONS = {
+    "Jewelry & Accessories": [
+        "Switch plastic bubble mailers → honeycomb padded paper mailers (curbside recyclable)",
+        "Wrap items in honeycomb packing paper instead of plastic bubble wrap",
+        "Use glassine bags instead of plastic zip bags for earrings/charms",
+        "Seal with kraft paper tape instead of plastic tape",
+    ],
+    "Clothing": [
+        "Replace poly mailers with recycled paper mailers or compostable mailers",
+        "Wrap garments in kraft/tissue instead of poly sleeves",
+        "Use paper stickers / soy ink labels instead of vinyl logo stickers",
+    ],
+    "Home & Living": [
+        "Use cardboard boxes sized to the product to avoid excess filler",
+        "Pad with shredded kraft or honeycomb wrap instead of air pillows",
+        "Use paper-based tape and include reuse note ('please reuse this box')",
+    ],
+    "Art & Prints": [
+        "Ship in rigid paper mailers or cardboard tubes instead of bubble mailers",
+        "Protect prints with glassine sleeves instead of plastic sleeves",
+        "Add corner protectors made of folded kraft cardstock (no foam corners)",
+    ],
+    "Bags & Purses": [
+        "Use recycled kraft paper wrap instead of poly dust bags",
+        "Seal boxes with water-activated kraft tape (plastic-free branding)",
+        "Swap plastic hang tags for paper swing tags + hemp twine",
+    ],
+    "Bath, Beauty, & Health": [
+        "Use tins / glass jars instead of plastic containers where possible",
+        "Cushion jars with honeycomb wrap or crinkle paper, not bubble wrap",
+        "Use compostable labels instead of glossy plastic labels",
+    ],
+    "Toys, Games, & Kids": [
+        "Use cardboard mailers or boxes sized tight to reduce filler",
+        "Replace plastic air pillows with kraft paper fill",
+        "Avoid polybags around soft toys; wrap in tissue instead",
+    ],
+    "Books, Music, & Media": [
+        "Use rigid cardboard mailers sized to fit instead of bubble mailers",
+        "Pad edges with folded kraft paper strips, not foam blocks",
+        "Seal with paper tape so the entire package is recyclable as cardboard",
+    ],
+    "Food & Beverages": [
+        "Use molded fiber / mushroom packaging instead of foam or plastic shells",
+        "Use paper-based tamper seals instead of plastic shrink bands",
+        "Choose paper-based filler that’s FDA/food-safe when possible",
+    ],
+    "Stationery & Small Gifts": [
+        "Ship in honeycomb or rigid mailers instead of bubble mailers",
+        "Use glassine sleeves for cards/stickers instead of poly sleeves",
+        "Swap poly logo mailer for recycled kraft mailer with paper sticker seal",
+    ],
+}
+
 FLOW = {
     "start": {
         "text": "Hi! I’m here to help you start your sustainability journey based off of your results. What do you need?",
@@ -320,7 +374,7 @@ FLOW = {
     },
 
     "recommendation": {
-        "text": "Based on your selected category and statistical results, here is my recommendations personalized for you!",
+        "text": "_dynamic_rec_",
        
         "options": [
             {"label": "Back to Start", "next": "start"},
@@ -334,6 +388,16 @@ FLOW = {
         ],
     },
 }
+
+
+def build_recommendation_text():
+    selected_cat = category
+    if (selected_cat not in CATEGORY_RECOMMENDATIONS:
+        return "Please selecte a business category above and run the analysis first. This will help give you the most personalized reocommendations."
+    recs = CATEGORY_RECOMMENDATIONS[selected_cat]
+
+    rec_list = "\n".join([f"• {item}" for item in recs])
+    return "Based on your business category and statistical results, here is my recommendations personalized for you!" + "\n\n" + rec_list
 
 # ---------- Session state ----------
 if "history" not in st.session_state:
@@ -353,6 +417,12 @@ def go(node_id: str):
     st.session_state.current_node = node_id
     node = FLOW[node_id]
 
+    # Personalized Recommendation node
+    if node_id == "recommendation":
+        dynamic_msg = build_recommendation_text()
+        st.session_state.history.append({"role": "assistant", "content": dynamic_msg})
+        return
+        
     # Only add the Start greeting the first time ever
     if node_id == "start":
         if st.session_state.start_message_shown:
