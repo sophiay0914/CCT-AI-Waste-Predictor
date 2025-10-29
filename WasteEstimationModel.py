@@ -128,11 +128,11 @@ if run_clicked:
     
 if not st.session_state.analysis_ready:        
     if uploaded_file is None:
-        st.sidebar.warning("Action 1: Please upload your Sold Orders CSV file above.")
+        st.sidebar.info("Action 1: Please upload your Sold Orders CSV file above.")
     elif zipcode_from == "" or ((not zipcode_from.isdigit()) or len(zipcode_from) != 5):
-        st.sidebar.warning("Action 2: Please enter a valid 5-digit origin ZIP code.")
+        st.sidebar.info("Action 2: Please enter a valid 5-digit origin ZIP code.")
     elif category == "— Select —":
-        st.sidebar.warning("Action 3: Please select your business category.")
+        st.sidebar.info("Action 3: Please select your business category.")
 
 if st.session_state.analysis_ready and st.session_state.df_order is not None:
     df_order = st.session_state.df_order.copy()
