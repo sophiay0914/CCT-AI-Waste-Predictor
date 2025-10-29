@@ -40,8 +40,8 @@ df_rate = pd.DataFrame(rate)
 
 
 # Step 2: Get CSV and ZIP input from user
-uploaded_file = st.file_uploader("Upload your Sold Orders CSV file", type="csv")
-zipcode_from = st.text_input("Enter your origin ZIP code").strip()
+uploaded_file = st.sidebar.file_uploader("Upload your Sold Orders CSV file", type="csv")
+zipcode_from = st.sidebar.text_input("Enter your origin ZIP code").strip()
 CATEGORIES = [
     "— Select —",
     "Jewelry & Accessories",
@@ -55,7 +55,7 @@ CATEGORIES = [
     "Food & Beverages",
     "Stationery & Small Gifts",
 ]
-category = st.selectbox("Select your business category", CATEGORIES, index=0)
+category = st.sidebar.selectbox("Select your business category", CATEGORIES, index=0)
 
 # Packaging weight fraction defaults by category (fraction of shipped weight)
 CATEGORY_PACKAGING_FRACTION = {
@@ -77,7 +77,7 @@ is_valid_zip = (zipcode_from != "") and zipcode_from.isdigit() and (len(zipcode_
 is_valid_cat = (category != "— Select —")
 all_valid = is_valid_csv and is_valid_zip and is_valid_cat
 
-run_clicked = st.button("►   Run analysis", type="primary", disabled=not all_valid)
+run_clicked = st.sidebar.button("►   Run analysis", type="primary", disabled=not all_valid)
 
 if run_clicked:
     # Step 4: Read in sold order data
@@ -128,11 +128,11 @@ if run_clicked:
     
 if not st.session_state.analysis_ready:        
     if uploaded_file is None:
-        st.warning("Action 1: Please upload your Sold Orders CSV file above.")
+        st.sidebar.warning("Action 1: Please upload your Sold Orders CSV file above.")
     elif zipcode_from == "" or ((not zipcode_from.isdigit()) or len(zipcode_from) != 5):
-        st.warning("Action 2: Please enter a valid 5-digit origin ZIP code.")
+        st.sidebar.warning("Action 2: Please enter a valid 5-digit origin ZIP code.")
     elif category == "— Select —":
-        st.warning("Action 3: Please select your business category.")
+        st.sidebar.warning("Action 3: Please select your business category.")
 
 if st.session_state.analysis_ready and st.session_state.df_order is not None:
     df_order = st.session_state.df_order.copy()
