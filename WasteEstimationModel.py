@@ -78,20 +78,19 @@ is_valid_cat = (category != "— Select —")
 all_valid = is_valid_csv and is_valid_zip and is_valid_cat
 run_clicked = st.sidebar.button("►   Run analysis", type="primary", disabled=not all_valid)
 
-# STEP 4: LOAD AND CLEAN DATA
+# STEP 3: LOAD AND CLEAN DATA
 if run_clicked:
     df_order = pd.read_csv(uploaded_file)
     df_order['zipcode_to'] = df_order['Ship Zipcode'].astype(str).str[:5]
     
-    # STEP 5: DISTANCE CALCULATION
+    # STEP 4: DISTANCE CALCULATION TO DETERMINE ZONE
     # calculate miles between origin ZIP code and each destination using pgeocode
     dist = pgeocode.GeoDistance('us')
     df_order['distance_miles'] = df_order['zipcode_to'].apply(
         lambda dest: dist.query_postal_code(zipcode_from, dest) * 0.621371
     )
     
-    # STEP 6: DISTANCE BUCKETING
-    # convert distances into eight USPS-style zone categories for matching
+    # convert distances into eight USPS-style zone categories for matching to Zone
     conditions = [
         df_order['distance_miles'] <= 50,
         (df_order['distance_miles'] > 50) & (df_order['distance_miles'] <= 150),
@@ -106,7 +105,7 @@ if run_clicked:
     df_order['distance_cat'] = np.select(conditions, choices, default=np.nan).astype(int)
     df_order.loc[df_order['distance_miles'].isna(), 'distance_cat'] = 8
         
-    # STEP 7: MATCH WEIGHT FROM COST
+    # STEP 5: MATCH WEIGHT FROM COST
     # match each order's shipping cost to the closest USPS rate weight in the same zone
     def match_weight(distance_cat, shipping_cost):
         zone_col = f"Zone {distance_cat}"
@@ -118,7 +117,7 @@ if run_clicked:
     df_order['matched_weight'] = df_order.apply(lambda r: match_weight(r['distance_cat'], r['shipping_cost']), axis=1)
     
 
-    # STEP 8: ESTIMATE PACKAGING WASTE
+    # STEP 6: ESTIMATE PACKAGING WASTE
     frac = CATEGORY_PACKAGING_FRACTION.get(category)
     # apply category-based packaging fractions to compute estimated waste per order
     df_order['package_weight'] = df_order['matched_weight'] * frac
@@ -137,7 +136,7 @@ if not st.session_state.analysis_ready:
     elif category == "— Select —":
         st.sidebar.info("Action 3: Please select your business category.")
 
-# STEP 9: VISUALIZATION TABS
+# STEP 7: VISUALIZATION TABS
 if st.session_state.analysis_ready and st.session_state.df_order is not None:
     df_order = st.session_state.df_order.copy()
         
@@ -247,7 +246,7 @@ if st.session_state.analysis_ready and st.session_state.df_order is not None:
         st.divider()
 
 
-# STEP 11: CHATBOT ASSISTANT
+# STEP 8: CHATBOT ASSISTANT
 CATEGORY_RECOMMENDATIONS = {
     "Jewelry & Accessories": [
         "1. Switch from plastic bubble mailers to honeycomb padded paper mailers \n\n"
