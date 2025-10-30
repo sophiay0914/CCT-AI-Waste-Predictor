@@ -5,18 +5,17 @@ import plotly.express as px
 import matplotlib.pyplot as plt
 import pgeocode
 
-# Configure Streamlit page Title
 st.set_page_config(page_title="Waste Estimation Model", layout="wide")
 st.title("Waste Estimation Model")
 
 if "analysis_ready" not in st.session_state:
-    st.session_state.analysis_ready = False  # did we already run analysis successfully?
+    st.session_state.analysis_ready = False
 if "df_order" not in st.session_state:
     st.session_state.df_order = None
 if "total_waste" not in st.session_state:
     st.session_state.total_waste = None
 
-# Step 1: Create USPS Shipping Rate Table
+# STEP 1: CREATE USPS SHIPPING RATE TABLE
 rate = {
     "weight": [
         0.25, 0.5, 0.75, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
@@ -34,13 +33,14 @@ rate = {
     "Zone 8": [5.85, 6.55, 7.35, 9.45, 16.65, 19.60, 21.20, 22.75, 24.80, 26.75, 29.00, 31.20, 34.50, 37.85, 40.65, 44.55, 48.00, 50.15, 52.35, 54.95, 57.55, 59.45, 60.65, 68.65, 73.95, 77.85, 81.10, 84.25, 87.45, 90.60, 93.40, 96.05, 98.65, 101.25, 103.80, 106.30, 108.70, 111.20, 113.50, 115.95, 118.25, 120.50, 122.75, 125.00, 127.15, 129.30, 131.35, 133.45, 135.45, 137.45, 139.35, 141.30, 143.15, 144.90, 146.70, 148.45, 150.20, 151.85, 153.45, 155.05, 156.60, 158.05, 159.60, 160.95, 162.40, 163.70, 165.05, 166.30, 167.60, 168.75, 169.85, 170.95, 172.05, 257.25]
    
 }
-
-# Create the Data Frame
+# create the data frame
 df_rate = pd.DataFrame(rate)
 
 
-# Step 2: Get CSV and ZIP input from user
+# STEP 2: USER INPUTS
+# sold orders CSV
 uploaded_file = st.sidebar.file_uploader("Upload your Sold Orders CSV file", type="csv")
+# origin ZIP
 zipcode_from = st.sidebar.text_input("Enter your origin ZIP code").strip()
 CATEGORIES = [
     "— Select —",
@@ -55,42 +55,43 @@ CATEGORIES = [
     "Food & Beverages",
     "Stationery & Small Gifts",
 ]
+#business category
 category = st.sidebar.selectbox("Select your business category", CATEGORIES, index=0)
 
-# Packaging weight fraction defaults by category (fraction of shipped weight)
+# Define default packaging weight fractions by product category (portion of total shipped weight).
 CATEGORY_PACKAGING_FRACTION = {
-    "Jewelry & Accessories": 0.20,     # small item + protective mailer/paper
-    "Clothing": 0.08,                  # poly/paper mailer + minimal inner wrap
-    "Home & Living": 0.05,             # larger/heavier items; packaging is a smaller share
-    "Art & Prints": 0.15,              # rigid mailers/tubes + flat protection
+    "Jewelry & Accessories": 0.20,     
+    "Clothing": 0.08,                 
+    "Home & Living": 0.05,             
+    "Art & Prints": 0.15,              
     "Bags & Purses": 0.10,
-    "Bath, Beauty, & Health": 0.12,    # jars/tins/inner wraps can add weight
+    "Bath, Beauty, & Health": 0.12,    
     "Toys, Games, & Kids": 0.09,
-    "Books, Music, & Media": 0.07,     # rigid mailer/box, modest padding
-    "Food & Beverages": 0.12,          # food-safe inner + cushioning
+    "Books, Music, & Media": 0.07,     
+    "Food & Beverages": 0.12,          
     "Stationery & Small Gifts": 0.19,
 }
 
-# Step 3: Data Processing if Input is Valid
 is_valid_csv = (uploaded_file is not None) and (uploaded_file.type == "text/csv")
 is_valid_zip = (zipcode_from != "") and zipcode_from.isdigit() and (len(zipcode_from) == 5)
 is_valid_cat = (category != "— Select —")
 all_valid = is_valid_csv and is_valid_zip and is_valid_cat
-
 run_clicked = st.sidebar.button("►   Run analysis", type="primary", disabled=not all_valid)
 
+# STEP 4: LOAD AND CLEAN DATA
 if run_clicked:
-    # Step 4: Read in sold order data
     df_order = pd.read_csv(uploaded_file)
     df_order['zipcode_to'] = df_order['Ship Zipcode'].astype(str).str[:5]
     
-    # Step 5: Calculate distance bewtween origin zip code and destination
+    # STEP 5: DISTANCE CALCULATION
+    # calculate miles between origin ZIP code and each destination using pgeocode
     dist = pgeocode.GeoDistance('us')
     df_order['distance_miles'] = df_order['zipcode_to'].apply(
         lambda dest: dist.query_postal_code(zipcode_from, dest) * 0.621371
     )
     
-    # Assign distance categories
+    # STEP 6: DISTANCE BUCKETING
+    # convert distances into eight USPS-style zone categories for matching
     conditions = [
         df_order['distance_miles'] <= 50,
         (df_order['distance_miles'] > 50) & (df_order['distance_miles'] <= 150),
@@ -103,11 +104,10 @@ if run_clicked:
     ]
     choices = list(range(1, 9))
     df_order['distance_cat'] = np.select(conditions, choices, default=np.nan).astype(int)
-    # if foreign country, set it as 8
     df_order.loc[df_order['distance_miles'].isna(), 'distance_cat'] = 8
-    #df_order_new = df_order[(df_order["distance_cat"] >=1) & (df_order["distance_cat"] <=8) ]
         
-    # Function to match USPS rate table
+    # STEP 7: MATCH WEIGHT FROM COST
+    # match each order's shipping cost to the closest USPS rate weight in the same zone
     def match_weight(distance_cat, shipping_cost):
         zone_col = f"Zone {distance_cat}"
         diffs = (df_rate[zone_col] - shipping_cost).abs()
@@ -116,12 +116,15 @@ if run_clicked:
     
     df_order['shipping_cost'] = df_order['Order Shipping'] / 0.78
     df_order['matched_weight'] = df_order.apply(lambda r: match_weight(r['distance_cat'], r['shipping_cost']), axis=1)
-    # 20% of weight is package weight
+    
+
+    # STEP 8: ESTIMATE PACKAGING WASTE
     frac = CATEGORY_PACKAGING_FRACTION.get(category)
+    # apply category-based packaging fractions to compute estimated waste per order
     df_order['package_weight'] = df_order['matched_weight'] * frac
     df_order['Sale Date'] = pd.to_datetime(df_order['Sale Date'])
     df_order = df_order.sort_values('Sale Date')
-    # store results so we don't lose them on rerun
+    
     st.session_state.df_order = df_order
     st.session_state.total_waste = df_order['package_weight'].sum()
     st.session_state.analysis_ready = True
@@ -134,27 +137,25 @@ if not st.session_state.analysis_ready:
     elif category == "— Select —":
         st.sidebar.info("Action 3: Please select your business category.")
 
+# STEP 9: VISUALIZATION TABS
 if st.session_state.analysis_ready and st.session_state.df_order is not None:
     df_order = st.session_state.df_order.copy()
         
     st.divider()
     
-    # Step 6: ================== VISUALIZATION TABS ==================
     tab_summary, tab_trends, tab_states = st.tabs([
         "Summary",
         "Packaging Waste Trends",
         "Packaging Waste by State",
     ])
-    # ---------- SUMMARY TAB ----------
-    # Total estimated waste
+    # SUMMARY TAB
     with tab_summary:
         total_waste = df_order['package_weight'].sum()
         year = df_order['Sale Date'].dt.year.mode()[0]
         st.subheader("Total Estimated Packaging Waste (lbs)")
         st.markdown(f"<h2 style='color:green;'>{round(total_waste, 2)} lbs</h2>", unsafe_allow_html=True)
         
-    # ---------- TRENDS TAB ----------
-    # Packaging Waste Trends
+    # TRENDS TAB
     with tab_trends:
         st.subheader("Packaging Waste Trends")
         col1, spacer, col2 = st.columns([1, 0.2, 1])
@@ -210,13 +211,12 @@ if st.session_state.analysis_ready and st.session_state.df_order is not None:
             st.plotly_chart(fig3)
                 
         
-    # ---------- GEOGRAPHIC TAB ----------
-    # State-level analysis
+    # GEOGRAPHIC TAB
     with tab_states:
         st.subheader("Packaging Waste by State")
         us_sales = df_order[df_order['Ship Country'] == 'United States']
         state_sales = us_sales.groupby('Ship State')['package_weight'].sum().reset_index()
-        # U.S. State Choropleth Map            
+        # U.S. State choropleth map            
         fig4 = px.choropleth(
             state_sales,            
             locations='Ship State',
@@ -234,7 +234,7 @@ if st.session_state.analysis_ready and st.session_state.df_order is not None:
         )
         st.plotly_chart(fig4, use_container_width=True)
         
-        # Top 5 States Tables
+        # top 5 states tables
         top_states = state_sales.sort_values(by='package_weight', ascending=False).head(5)
         top_states = top_states.rename(columns={
             'Ship State': 'State',
@@ -247,7 +247,7 @@ if st.session_state.analysis_ready and st.session_state.df_order is not None:
         st.divider()
 
 
-# ================== CHATBOT ==================
+# STEP 11: CHATBOT ASSISTANT
 CATEGORY_RECOMMENDATIONS = {
     "Jewelry & Accessories": [
         "1. Switch from plastic bubble mailers to honeycomb padded paper mailers \n\n"
@@ -412,17 +412,15 @@ def build_recommendation_text():
     return "Based on your business category and statistical results, here is my recommendations personalized for you!" + "\n\n" + rec_list
 
     
-# ---------- Session state ----------
+# Session state
 if "history" not in st.session_state:
     st.session_state.history = []
 if "current_node" not in st.session_state:
     st.session_state.current_node = "start"
 if "form_data" not in st.session_state:
     st.session_state.form_data = {}
-# tracks whether we've already shown the start greeting
 if "start_message_shown" not in st.session_state:
     st.session_state.start_message_shown = False
-# tracks whether we've bootstrapped the chat once
 if "bootstrapped" not in st.session_state:
     st.session_state.bootstrapped = False
 
@@ -430,16 +428,13 @@ def go(node_id: str):
     st.session_state.current_node = node_id
     node = FLOW[node_id]
 
-    # Personalized Recommendation node
     if node_id == "recommendation":
         dynamic_msg = build_recommendation_text()
         st.session_state.history.append({"role": "assistant", "content": dynamic_msg})
         return
-        
-    # Only add the Start greeting the first time ever
     if node_id == "start":
         if st.session_state.start_message_shown:
-            return  # we've already shown the greeting once
+            return
         st.session_state.start_message_shown = True
 
     st.session_state.history.append({"role": "assistant", "content": node["text"]})
@@ -452,19 +447,15 @@ def reset_chat():
     st.session_state.bootstrapped = False
     go("start")
 
-# Bootstrap the very first time the app loads
 if not st.session_state.bootstrapped:
     st.session_state.bootstrapped = True
     go("start")
 
 def _handle_option_click(label: str, next_node: str):
-    # Called by option buttons; no rerun needed
     st.session_state.history.append({"role": "user", "content": label})
     go(next_node)
             
-# ---------- Chat UI renderer (used inside the floating widget) ----------
 def render_chat_ui():
-    # Controls row
     c1, c2 = st.columns(2)
     c1.button("⟳ Restart", use_container_width=True, on_click=reset_chat)
     c2.download_button(
@@ -476,7 +467,6 @@ def render_chat_ui():
 
     st.divider()
 
-    # History
     for m in st.session_state.history[-12:]:
         with st.chat_message(m["role"]):
             st.markdown(m["content"])
@@ -484,7 +474,6 @@ def render_chat_ui():
     node_id = st.session_state.current_node
     node = FLOW[node_id]
 
-    # Options as buttons (use on_click to avoid double-click feel)
     if "options" in node and node["options"]:
         with st.chat_message("assistant"):
             st.caption("Choose an option:")
@@ -493,7 +482,7 @@ def render_chat_ui():
                 col = cols[i % len(cols)]
                 col.button(
                     opt["label"],
-                    key=f"opt_{node_id}_{i}",  # stable, unique
+                    key=f"opt_{node_id}_{i}",
                     use_container_width=True,
                     on_click=_handle_option_click,
                     args=(opt["label"], opt["next"])
